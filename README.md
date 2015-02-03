@@ -14,7 +14,7 @@ $ go get github.com/pili-io/pili-sdk-go/pili
 
 import (
     "github.com/pili-io/pili-sdk-go/pili"
-    "fmt"
+    // ...
 )
 
 
@@ -34,7 +34,7 @@ stream, err := app.CreateStream(nil)
  *  comment: default is blank
 
     postdata := map[string]interface{}{
-        "key":        "8a7e79a8-dbb6-492a-a159-c291138cb461", // secret key like password for protected streaming
+        "key":        "stream_secret_key", // used for protected streaming
         "is_private": false,
         "comment":    "test_streaming_001",
     }
@@ -53,6 +53,38 @@ fmt.Println("Stream push URL:", stream.PushUrl[0].RTMP)
 fmt.Println("Stream RTMP live play URL:", stream.LiveUrl.RTMP)
 fmt.Println("Stream HLS live play URL:", stream.LiveUrl.HLS)
 
+
+// Signing a pushing url, then send it to the pusher client.
+
+push := pili.PushPolicy{
+    BaseUrl: stream.PushUrl[0].RTMP,
+    Key:     stream.Key,
+    Nonce:   time.Now().UnixNano(),
+}
+fmt.Println("Push Token is:", push.Token())
+fmt.Println("Push URL is:", push.Url())
+
+
+// If true === stream.IsPrivate, we need signing for play.
+
+playrtmp := pili.PlayPolicy{
+    BaseUrl: stream.LiveUrl.RTMP,
+    Key:     stream.Key,
+    Expiry:  time.Now().Unix() + 3600,
+}
+fmt.Println("RTMP play token is:", playrtmp.Token())
+fmt.Println("RTMP play url is:", playrtmp.Url())
+
+playhls := pili.PlayPolicy{
+    BaseUrl: stream.LiveUrl.HLS,
+    Key:     stream.Key,
+    Expiry:  time.Now().Unix() + 3600,
+}
+fmt.Println("HLS play token is:", playhls.Token())
+fmt.Println("HLS play url is:", playhls.Url())
+
+
+// Stream ID is useful, maybe we should storage it use later.
 sid := stream.Id
 
 // Get an exist stream
