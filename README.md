@@ -55,7 +55,6 @@ fmt.Println("Stream HLS live play URL:", stream.LiveUrl.HLS)
 
 
 // Signing a pushing url, then send it to the pusher client.
-
 push := pili.PushPolicy{
     BaseUrl: stream.PushUrl[0].RTMP,
     Key:     stream.Key,
@@ -66,7 +65,6 @@ fmt.Println("Push URL is:", push.Url())
 
 
 // If true === stream.IsPrivate, we need signing for play.
-
 playrtmp := pili.PlayPolicy{
     BaseUrl: stream.LiveUrl.RTMP,
     Key:     stream.Key,
