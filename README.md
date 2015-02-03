@@ -19,7 +19,7 @@ import (
 
 
 // Instantiate an client
-var mac = pili.Mac{AccessKey, SecresultKey}
+var mac = pili.Mac{AccessKey, SecretKey}
 var app = pili.NewClient(&mac)
 
 
@@ -46,7 +46,7 @@ if err != nil {
 }
 
 fmt.Printf("Result:%+v\n", stream)
-fmt.Println("Stream Id:", stream.Id) // This is the only thing should write to the database
+fmt.Println("Stream Id:", stream.Id)
 fmt.Println("Stream Key:", stream.Key)
 fmt.Println("Stream is privately:", stream.IsPrivate)
 fmt.Println("Stream push URL:", stream.PushUrl[0].RTMP)
