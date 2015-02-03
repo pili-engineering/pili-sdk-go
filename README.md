@@ -13,8 +13,8 @@ $ go get github.com/pili-io/pili-sdk-go/pili
 ```go
 
 import (
-    "fmt"
     "github.com/pili-io/pili-sdk-go/pili"
+    "fmt"
 )
 
 
@@ -27,10 +27,14 @@ var app = pili.NewClient(&mac)
 stream, err := app.CreateStream(nil)
 
 /*
- * or create a new stream with some custom args
+ *  or create a new stream with your custom arguments
+ *
+ *  key: default is auto generated
+ *  is_private: default is false
+ *  comment: default is blank
 
     postdata := map[string]interface{}{
-        "key":        "8a7e79a8-dbb6-492a-a159-c291138cb461", // secresult key like password
+        "key":        "8a7e79a8-dbb6-492a-a159-c291138cb461", // secret key like password for protected streaming
         "is_private": false,
         "comment":    "test_streaming_001",
     }
