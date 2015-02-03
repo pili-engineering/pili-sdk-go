@@ -16,6 +16,10 @@ type Mac struct {
 	SecretKey string
 }
 
+func Creds(accessKey, secretKey string) *Mac {
+	return &Mac{accessKey, secretKey}
+}
+
 func (mac *Mac) SignRequest(req *http.Request, incbody bool) (token string, err error) {
 
 	h := hmac.New(sha1.New, []byte(mac.SecretKey))

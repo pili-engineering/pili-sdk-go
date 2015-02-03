@@ -19,8 +19,8 @@ import (
 
 
 // Instantiate an client
-var mac = pili.Mac{AccessKey, SecretKey}
-var app = pili.NewClient(&mac)
+var creds = pili.Creds(AccessKey, SecretKey)
+var app = pili.NewClient(creds)
 
 
 // Create a new stream
