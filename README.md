@@ -45,6 +45,13 @@ if err != nil {
     panic(err)
 }
 
+
+// Stream ID is useful, maybe we should storage it use later.
+sid := stream.Id
+
+// Get an exist stream
+stream, err = app.GetStream(sid)
+
 fmt.Printf("Result:%+v\n", stream)
 fmt.Println("Stream Id:", stream.Id)
 fmt.Println("Stream Key:", stream.Key)
@@ -82,16 +89,10 @@ fmt.Println("HLS play token is:", playhls.Token())
 fmt.Println("HLS play url is:", playhls.Url())
 
 
-// Stream ID is useful, maybe we should storage it use later.
-sid := stream.Id
-
-// Get an exist stream
-stream, err := app.GetStream(sid)
-fmt.Printf("Result:%+v\n", stream)
 
 // Update a stream
-stream, err := app.SetStream(sid, postdata)
-fmt.Printf("Result:%+v\n", stream)
+result, err := app.SetStream(sid, postdata)
+fmt.Printf("Result:%+v\n", result)
 
 // Get Status on a stream
 result, err := app.GetStreamStatus(sid)
@@ -102,8 +103,8 @@ result, err := app.ListStreams()
 fmt.Printf("Result:%+v\n", result)
 
 // Delete a stream
-stream, err := app.DelStream(sid)
-fmt.Printf("Result:%+v\n", stream)
+result, err := app.DelStream(sid)
+fmt.Printf("Result:%+v\n", result)
 
 // Get recording segments from a stream
 result, err := app.GetStreamSegments(sid, starttime, endtime)
