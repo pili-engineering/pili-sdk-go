@@ -3,6 +3,7 @@ package pili
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type API_Client struct {
@@ -68,8 +69,8 @@ type LivePlayUrl struct {
 
 type Stream struct {
 	Id          string       `json:"id"`
-	CreatedAt   string       `json:"created_at"`
-	UpdatedAt   string       `json:"updated_at"`
+	CreatedAt   time.Time    `json:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at"`
 	Application string       `json:"application"`
 	IsPrivate   bool         `json:"is_private"`
 	Key         string       `json:"key"`
