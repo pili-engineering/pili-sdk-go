@@ -24,17 +24,13 @@ var app = pili.NewClient(creds)
 
 
 // Create a new stream
-/*
- *  or create a new stream with your custom arguments
- *
-    postdata := map[string]interface{}{
-        "title":           "streamName",
-        "hub":             "hubName",
-        "publishKey":      "8e7a69c1", 
-        "publishSecurity": "dynamic",
-    }
-    stream, err := app.CreateStream(postdata)
-*/
+postdata := map[string]interface{}{
+    "title":           "streamName",
+    "hub":             "hubName",
+    "publishKey":      "8e7a69c1",
+    "publishSecurity": "dynamic",
+}
+stream, err := app.CreateStream(postdata)
 
 if err != nil {
     panic(err)
