@@ -25,10 +25,10 @@ var app = pili.NewClient(creds)
 
 // Create a new stream
 postdata := map[string]interface{}{
-    "title":           "streamName",
-    "hub":             "hubName",
-    "publishKey":      "8e7a69c1",
-    "publishSecurity": "dynamic",
+    "title":           "streamName", // optional, default is auto-generated
+    "hub":             "hubName",    // requried, must be exists
+    "publishKey":      "8e7a69c1",   // required, a secret key for signing pubishToken
+    "publishSecurity": "dynamic",    // required, "dynamic" or "static"
 }
 stream, err := app.CreateStream(postdata)
 
@@ -55,7 +55,7 @@ fmt.Println("Publish URL is:", publish.Url())
 
 // Update a stream
 newdata := map[string]interface{}{
-	"publishKey":      "8e7a69c1", // like password
+	"publishKey":      "8e7a69c2",
 	"publishSecurity": "static",
 }
 stream, err = app.SetStream(stream.Id, newdata)
