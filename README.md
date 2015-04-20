@@ -45,7 +45,7 @@ fmt.Printf("Result:%+v\n", stream)
 
 // Signing a pushing url, then send it to the pusher client.
 push := pili.PushPolicy{
-    BaseUrl: 'rtmp://<rtmpPublishHost>/<hubName>/<streamName>',
+    BaseUrl: "rtmp://<rtmpPublishHost>/<hubName>/<streamName>",
     Key:     stream.PublishKey,
     Nonce:   time.Now().UnixNano(),
 }
