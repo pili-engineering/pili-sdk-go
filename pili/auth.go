@@ -20,18 +20,29 @@ func Creds(accessKey, secretKey string) *Mac {
 	return &Mac{accessKey, secretKey}
 }
 
-func (mac *Mac) SignRequest(req *http.Request, incbody bool) (token string, err error) {
+func incBody(req *http.Request, ctType string) bool {
+
+	return req.Body != nil && ctType != "" && ctType != "application/octet-stream"
+}
+
+func (mac *Mac) SignRequest(req *http.Request) (token string, err error) {
 
 	h := hmac.New(sha1.New, []byte(mac.SecretKey))
 
 	u := req.URL
-	data := u.Path
+	data := req.Method + " " + u.Path
 	if u.RawQuery != "" {
 		data += "?" + u.RawQuery
 	}
-	io.WriteString(h, data+"\n")
+	io.WriteString(h, data+"\nHost: "+req.Host)
 
-	if incbody {
+	ctType := req.Header.Get("Content-Type")
+	if ctType != "" {
+		io.WriteString(h, "\nContent-Type: "+ctType)
+	}
+	io.WriteString(h, "\n\n")
+
+	if incBody(req, ctType) {
 		s2, err2 := seekable.New(req)
 		if err2 != nil {
 			return "", err2
@@ -51,25 +62,12 @@ type Transport struct {
 	transport http.RoundTripper
 }
 
-func incBody(req *http.Request) bool {
-	if req.Body == nil {
-		return false
-	}
-	if ct, ok := req.Header["Content-Type"]; ok {
-		switch ct[0] {
-		case "application/json":
-			return true
-		}
-	}
-	return false
-}
-
 func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	token, err := t.mac.SignRequest(req, incBody(req))
+	token, err := t.mac.SignRequest(req)
 	if err != nil {
 		return
 	}
-	req.Header.Set("Authorization", "pili "+token)
+	req.Header.Set("Authorization", "Qiniu "+token)
 	return t.transport.RoundTrip(req)
 }
 

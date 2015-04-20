@@ -5,7 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"strconv"
-	"time"
+	//"time"
 )
 
 func Sign(secret, data []byte) (token string) {
@@ -42,7 +42,7 @@ func (p PushPolicy) Url() (url string) {
 }
 
 // ----------------------------------------------------------
-
+/*
 type PlayPolicy struct {
 	BaseUrl string
 	Key     string
@@ -70,3 +70,4 @@ func (p PlayPolicy) Url() (url string) {
 	return
 
 }
+*/

@@ -3,7 +3,6 @@ package pili
 import (
 	"fmt"
 	"net/http"
-	"time"
 )
 
 type API_Client struct {
@@ -18,13 +17,9 @@ func NewClient(mac *Mac) API_Client {
 
 // -----------------------------------------------------------------------------------------------------------
 
-var API_BASE_URL = "http://api.pili.qiniu.com/v1"
+var API_BASE_URL = "http://pili.qiniuapi.com/v1"
 
 func URI_NewStream() string {
-	return fmt.Sprintf("%s/streams", API_BASE_URL)
-}
-
-func URI_ListStreams() string {
 	return fmt.Sprintf("%s/streams", API_BASE_URL)
 }
 
@@ -40,66 +35,36 @@ func URI_DelStream(id string) string {
 	return fmt.Sprintf("%s/streams/%s", API_BASE_URL, id)
 }
 
-func URI_GetStreamStatus(id string) string {
-	return fmt.Sprintf("%s/streams/%s/status", API_BASE_URL, id)
+func URI_ListStreams(hub string, marker, limit int64) string {
+	return fmt.Sprintf("%s/streams?hub=%s&marker=%d&limit=%d", API_BASE_URL, hub, marker, limit)
 }
 
-func URI_GetStreamSegments(id string, starttime, endtime int64) string {
-	return fmt.Sprintf("%s/streams/%s/segments?starttime=%d&endtime=%d", API_BASE_URL, id, starttime, endtime)
-}
-
-func URI_DelStreamSegments(id string, starttime, endtime int64) string {
-	return fmt.Sprintf("%s/streams/%s/segments?starttime=%d&endtime=%d", API_BASE_URL, id, starttime, endtime)
-}
-
-func URI_PlayStreamSegments(id string, starttime, endtime int64) string {
-	return fmt.Sprintf("%s/streams/%s/segments/play?starttime=%d&endtime=%d", API_BASE_URL, id, starttime, endtime)
+func URI_GetStreamSegments(id string, start, end int64) string {
+	return fmt.Sprintf("%s/streams/%s/segments?start=%d&end=%d", API_BASE_URL, id, start, end)
 }
 
 // -----------------------------------------------------------------------------------------------------------
 
-type StreamUrl struct {
-	RTMP string `json:"RTMP"`
-	HLS  string `json:"HLS"`
-}
-
-type LivePlayUrl struct {
-	*StreamUrl `json:"[original]"`
-}
-
 type Stream struct {
-	Id          string       `json:"id"`
-	CreatedAt   time.Time    `json:"created_at"`
-	UpdatedAt   time.Time    `json:"updated_at"`
-	Application string       `json:"application"`
-	IsPrivate   bool         `json:"is_private"`
-	Key         string       `json:"key"`
-	Comment     string       `json:"comment"`
-	PushUrl     []*StreamUrl `json:"push_url"`
-	LiveUrl     *LivePlayUrl `json:"live_url"`
-}
-
-type StreamStatus struct {
-	Status string `json:"status"`
+	Id              string `json:"id"`
+	Hub             string `json:"hub"`
+	Title           string `json:"title"`
+	PublishKey      string `json:"publishKey"`
+	PublishSecurity string `json:"publishSecurity"`
 }
 
 type StreamList struct {
-	Total   uint32    `json:"total"`
-	Streams []*Stream `json:"streams"`
+	Marker uint32    `json:"marker"`
+	Items  []*Stream `json:"items"`
 }
 
 type StreamSegment struct {
-	StartTime int64 `json:"starttime"`
-	EndTime   int64 `json:"endtime"`
+	Start int64 `json:"start"`
+	End   int64 `json:"end"`
 }
 
 type StreamSegmentList struct {
-	Total uint32           `json:"total"`
-	List  []*StreamSegment `json:"list"`
-}
-
-type StreamSegmentPlay struct {
-	Url string `json:"url"`
+	segments []*StreamSegment `json:"segments"`
 }
 
 // -----------------------------------------------------------------------------------------------------------
@@ -119,32 +84,17 @@ func (app API_Client) SetStream(id string, data interface{}) (ret Stream, err er
 	return
 }
 
-func (app API_Client) DelStream(id string) (ret Stream, err error) {
+func (app API_Client) DelStream(id string) (ret interface{}, err error) {
 	err = app.Conn.DelCall(&ret, URI_DelStream(id))
 	return
 }
 
-func (app API_Client) GetStreamStatus(id string) (ret StreamStatus, err error) {
-	err = app.Conn.GetCall(&ret, URI_GetStreamStatus(id))
+func (app API_Client) ListStreams(hub string, marker, limit int64) (ret StreamList, err error) {
+	err = app.Conn.GetCall(&ret, URI_ListStreams(hub, marker, limit))
 	return
 }
 
-func (app API_Client) ListStreams() (ret StreamList, err error) {
-	err = app.Conn.GetCall(&ret, URI_ListStreams())
-	return
-}
-
-func (app API_Client) GetStreamSegments(id string, starttime, endtime int64) (ret StreamSegmentList, err error) {
-	err = app.Conn.GetCall(&ret, URI_GetStreamSegments(id, starttime, endtime))
-	return
-}
-
-func (app API_Client) PlayStreamSegments(id string, starttime, endtime int64) (ret StreamSegmentPlay, err error) {
-	err = app.Conn.GetCall(&ret, URI_PlayStreamSegments(id, starttime, endtime))
-	return
-}
-
-func (app API_Client) DelStreamSegments(id string, starttime, endtime int64) (ret interface{}, err error) {
-	err = app.Conn.DelCall(&ret, URI_DelStreamSegments(id, starttime, endtime))
+func (app API_Client) GetStreamSegments(id string, start, end int64) (ret StreamSegmentList, err error) {
+	err = app.Conn.GetCall(&ret, URI_GetStreamSegments(id, start, end))
 	return
 }
