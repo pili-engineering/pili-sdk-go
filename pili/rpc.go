@@ -9,8 +9,6 @@ import (
 	"runtime"
 )
 
-var VERSION = "1.0.1"
-
 func formatUserAgent() string {
 	return fmt.Sprintf("pili-sdk-go/%s %s %s/%s", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH)
 }
