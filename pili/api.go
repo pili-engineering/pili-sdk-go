@@ -3,6 +3,7 @@ package pili
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type API_Client struct {
@@ -17,7 +18,7 @@ func NewClient(mac *Mac) API_Client {
 
 // -----------------------------------------------------------------------------------------------------------
 
-var API_BASE_URL = "http://pili.qiniuapi.com/v1"
+var API_BASE_URL = fmt.Sprintf("http://%s/v1", API_HOST)
 
 func URI_NewStream() string {
 	return fmt.Sprintf("%s/streams", API_BASE_URL)
@@ -46,15 +47,17 @@ func URI_GetStreamSegments(id string, start, end int64) string {
 // -----------------------------------------------------------------------------------------------------------
 
 type Stream struct {
-	Id              string `json:"id"`
-	Hub             string `json:"hub"`
-	Title           string `json:"title"`
-	PublishKey      string `json:"publishKey"`
-	PublishSecurity string `json:"publishSecurity"`
+	Id              string    `json:"id"`
+	Hub             string    `json:"hub"`
+	CreatedAt       time.Time `json:"createdAt"`
+	UpdatedAt       time.Time `json:"updatedAt"`
+	Title           string    `json:"title"`
+	PublishKey      string    `json:"publishKey"`
+	PublishSecurity string    `json:"publishSecurity"`
 }
 
 type StreamList struct {
-	Marker uint32    `json:"marker"`
+	Marker string    `json:"marker"`
 	Items  []*Stream `json:"items"`
 }
 

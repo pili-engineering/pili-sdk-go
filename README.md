@@ -45,10 +45,11 @@ fmt.Printf("Result:%+v\n", stream)
 
 // Signing a publish url, then send it to the publisher client.
 publish := pili.PublishPolicy{
-    BaseUrl: "rtmp://<rtmpPublishHost>/<hubName>/<streamName>",
-    Key:     stream.PublishKey,
-    Nonce:   time.Now().UnixNano(),
+    BaseUrl:    "rtmp://<rtmpPublishHost>/<hubName>/<streamName>",
+    PublishKey: stream.PublishKey,
+    Nonce:      time.Now().UnixNano(),
 }
+
 fmt.Println("Publish Token is:", publish.Token())
 fmt.Println("Publish URL is:", publish.Url())
 
