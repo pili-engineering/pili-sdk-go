@@ -5,7 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"strconv"
-	"time"
+	//"time"
 )
 
 func Sign(secret, data []byte) (token string) {
@@ -17,13 +17,13 @@ func Sign(secret, data []byte) (token string) {
 
 // ----------------------------------------------------------
 
-type PushPolicy struct {
+type PublishPolicy struct {
 	BaseUrl string
 	Key     string
 	Nonce   int64
 }
 
-func (p PushPolicy) Sign() (token, url string) {
+func (p PublishPolicy) Sign() (token, url string) {
 	nonce := p.Nonce
 	url = p.BaseUrl + "?nonce=" + strconv.FormatInt(nonce, 10)
 	token = Sign([]byte(p.Key), []byte(url))
@@ -31,18 +31,18 @@ func (p PushPolicy) Sign() (token, url string) {
 	return
 }
 
-func (p PushPolicy) Token() (token string) {
+func (p PublishPolicy) Token() (token string) {
 	token, _ = p.Sign()
 	return
 }
 
-func (p PushPolicy) Url() (url string) {
+func (p PublishPolicy) Url() (url string) {
 	_, url = p.Sign()
 	return
 }
 
 // ----------------------------------------------------------
-
+/*
 type PlayPolicy struct {
 	BaseUrl string
 	Key     string
@@ -70,3 +70,4 @@ func (p PlayPolicy) Url() (url string) {
 	return
 
 }
+*/

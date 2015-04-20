@@ -24,99 +24,59 @@ var app = pili.NewClient(creds)
 
 
 // Create a new stream
-stream, err := app.CreateStream(nil)
-
-/*
- *  or create a new stream with your custom arguments
- *
- *  key: default is auto generated
- *  is_private: default is false
- *  comment: default is blank
-
-    postdata := map[string]interface{}{
-        "key":        "stream_secret_key", // used for protected streaming
-        "is_private": false,
-        "comment":    "test_streaming_001",
-    }
-    stream, err := app.CreateStream(postdata)
-*/
+postdata := map[string]interface{}{
+    "title":           "streamName", // optional, default is auto-generated
+    "hub":             "hubName",    // requried, must be exists
+    "publishKey":      "8e7a69c1",   // required, a secret key for signing pubishToken
+    "publishSecurity": "dynamic",    // required, "dynamic" or "static"
+}
+stream, err := app.CreateStream(postdata)
 
 if err != nil {
     panic(err)
 }
 
 
-// Stream ID is useful, maybe we should storage it use later.
-sid := stream.Id
-
 // Get an exist stream
-stream, err = app.GetStream(sid)
+stream, err = app.GetStream(stream.Id)
 
 fmt.Printf("Result:%+v\n", stream)
-fmt.Println("Stream Id:", stream.Id)
-fmt.Println("Stream Key:", stream.Key)
-fmt.Println("Stream is privately:", stream.IsPrivate)
-fmt.Println("Stream push URL:", stream.PushUrl[0].RTMP)
-fmt.Println("Stream RTMP live play URL:", stream.LiveUrl.RTMP)
-fmt.Println("Stream HLS live play URL:", stream.LiveUrl.HLS)
 
 
-// Signing a pushing url, then send it to the pusher client.
-push := pili.PushPolicy{
-    BaseUrl: stream.PushUrl[0].RTMP,
-    Key:     stream.Key,
+// Signing a publish url, then send it to the publisher client.
+publish := pili.PublishPolicy{
+    BaseUrl: "rtmp://<rtmpPublishHost>/<hubName>/<streamName>",
+    Key:     stream.PublishKey,
     Nonce:   time.Now().UnixNano(),
 }
-fmt.Println("Push Token is:", push.Token())
-fmt.Println("Push URL is:", push.Url())
-
-
-// If true === stream.IsPrivate, we need signing for play.
-playrtmp := pili.PlayPolicy{
-    BaseUrl: stream.LiveUrl.RTMP,
-    Key:     stream.Key,
-    Expiry:  time.Now().Unix() + 3600,
-}
-fmt.Println("RTMP play token is:", playrtmp.Token())
-fmt.Println("RTMP play url is:", playrtmp.Url())
-
-playhls := pili.PlayPolicy{
-    BaseUrl: stream.LiveUrl.HLS,
-    Key:     stream.Key,
-    Expiry:  time.Now().Unix() + 3600,
-}
-fmt.Println("HLS play token is:", playhls.Token())
-fmt.Println("HLS play url is:", playhls.Url())
-
+fmt.Println("Publish Token is:", publish.Token())
+fmt.Println("Publish URL is:", publish.Url())
 
 
 // Update a stream
-result, err := app.SetStream(sid, postdata)
+newdata := map[string]interface{}{
+	"publishKey":      "8e7a69c2",
+	"publishSecurity": "static",
+}
+stream, err = app.SetStream(stream.Id, newdata)
+if err != nil {
+	panic(err)
+}
 fmt.Printf("Result:%+v\n", result)
 
-// Get Status on a stream
-result, err := app.GetStreamStatus(sid)
-fmt.Printf("Result:%+v\n", result)
 
 // List exist streams
-result, err := app.ListStreams()
+result, err := app.ListStreams(hubName, nextMaker, limitCount)
 fmt.Printf("Result:%+v\n", result)
+
 
 // Delete a stream
-result, err := app.DelStream(sid)
+result, err := app.DelStream(stream.Id)
 fmt.Printf("Result:%+v\n", result)
+
 
 // Get recording segments from a stream
-result, err := app.GetStreamSegments(sid, starttime, endtime)
+result, err := app.GetStreamSegments(stream.Id, startUnixTimeStamp, endUnixTimeStamp)
 fmt.Printf("Result:%+v\n", result)
-
-// Delete recording segments on a stream
-result, err := app.DelStreamSegments(sid, starttime, endtime)
-fmt.Printf("Result:%+v\n", result)
-
-// Get the play url of those stream recording segments
-result, err := app.PlayStreamSegments(sid, starttime, endtime)
-fmt.Printf("Result:%+v\n", result)
-
 
 ```
