@@ -43,14 +43,14 @@ stream, err = app.GetStream(stream.Id)
 fmt.Printf("Result:%+v\n", stream)
 
 
-// Signing a pushing url, then send it to the pusher client.
-push := pili.PushPolicy{
+// Signing a publish url, then send it to the publisher client.
+publish := pili.PublishPolicy{
     BaseUrl: "rtmp://<rtmpPublishHost>/<hubName>/<streamName>",
     Key:     stream.PublishKey,
     Nonce:   time.Now().UnixNano(),
 }
-fmt.Println("Push Token is:", push.Token())
-fmt.Println("Push URL is:", push.Url())
+fmt.Println("Publish Token is:", publish.Token())
+fmt.Println("Publish URL is:", publish.Url())
 
 
 // Update a stream
