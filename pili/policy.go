@@ -10,10 +10,8 @@ import (
 	"time"
 )
 
-const STREAM_ID_SEPARATOR = "."
-
 func resolveStreamId(sid string) (hub, title string) {
-	a := strings.Split(sid, STREAM_ID_SEPARATOR)
+	a := strings.Split(sid, ".")
 	hub = a[1]
 	title = a[2]
 	return
@@ -42,8 +40,7 @@ func (p PublishPolicy) baseUrl() (url string) {
 }
 
 func (p PublishPolicy) staticUrl() (url string) {
-	hub, title := resolveStreamId(p.StreamId)
-	url = fmt.Sprintf("rtmp://%s/%s/%s?key=%s", RTMP_PUBLISH_HOST, hub, title, p.StreamPublishKey)
+	url = fmt.Sprintf("%s?key=%s", p.baseUrl(), p.StreamPublishKey)
 	return
 }
 
