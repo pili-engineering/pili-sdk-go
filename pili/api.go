@@ -18,7 +18,7 @@ func NewClient(mac *Mac) API_Client {
 
 // -----------------------------------------------------------------------------------------------------------
 
-var API_BASE_URL = fmt.Sprintf("http://%s/v1", API_HOST)
+var API_BASE_URL = fmt.Sprintf("%s://%s/%s", getHttpScheme(), getApiHost(), API_VERSION)
 
 func URI_NewStream() string {
 	return fmt.Sprintf("%s/streams", API_BASE_URL)
