@@ -3,15 +3,9 @@ package pili
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
-	"runtime"
 )
-
-func formatUserAgent() string {
-	return fmt.Sprintf("pili-sdk-go/%s %s %s/%s", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH)
-}
 
 // -----------------------------------------------------------------------------------------------------------
 
@@ -22,7 +16,7 @@ type RPC_Client struct {
 var DefaultClient = RPC_Client{http.DefaultClient}
 
 func (r RPC_Client) Do(req *http.Request) (resp *http.Response, err error) {
-	req.Header.Set("User-Agent", formatUserAgent())
+	req.Header.Set("User-Agent", UserAgent())
 	resp, err = r.Client.Do(req)
 	if err != nil {
 		return

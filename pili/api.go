@@ -36,12 +36,26 @@ func URI_DelStream(id string) string {
 	return fmt.Sprintf("%s/streams/%s", API_BASE_URL, id)
 }
 
-func URI_ListStreams(hub string, marker, limit int64) string {
-	return fmt.Sprintf("%s/streams?hub=%s&marker=%d&limit=%d", API_BASE_URL, hub, marker, limit)
+func URI_ListStreams(hub string, options map[string]interface{}) (httpurl string) {
+	httpurl = fmt.Sprintf("%s/streams?hub=%s", API_BASE_URL, hub)
+	if marker, ok := options["marker"]; ok && marker != "" {
+		httpurl = fmt.Sprintf("%s&marker=%s", httpurl, marker)
+	}
+	if limit, ok := options["limit"]; ok && limit != 0 {
+		httpurl = fmt.Sprintf("%s&limit=%d", httpurl, limit)
+	}
+	return
 }
 
-func URI_GetStreamSegments(id string, start, end int64) string {
-	return fmt.Sprintf("%s/streams/%s/segments?start=%d&end=%d", API_BASE_URL, id, start, end)
+func URI_GetStreamSegments(id string, options map[string]int64) (httpurl string) {
+	httpurl = fmt.Sprintf("%s/streams/%s/segments", API_BASE_URL, id)
+	if start, ok := options["start"]; ok && start > 0 {
+		httpurl = fmt.Sprintf("%s?start=%d", httpurl, start)
+	}
+	if end, ok := options["end"]; ok && end > 0 {
+		httpurl = fmt.Sprintf("%s&end=%d", httpurl, end)
+	}
+	return
 }
 
 // -----------------------------------------------------------------------------------------------------------
@@ -67,7 +81,7 @@ type StreamSegment struct {
 }
 
 type StreamSegmentList struct {
-	segments []*StreamSegment `json:"segments"`
+	Segments []*StreamSegment `json:"segments"`
 }
 
 // -----------------------------------------------------------------------------------------------------------
@@ -92,12 +106,12 @@ func (app API_Client) DelStream(id string) (ret interface{}, err error) {
 	return
 }
 
-func (app API_Client) ListStreams(hub string, marker, limit int64) (ret StreamList, err error) {
-	err = app.Conn.GetCall(&ret, URI_ListStreams(hub, marker, limit))
+func (app API_Client) ListStreams(hub string, options map[string]interface{}) (ret StreamList, err error) {
+	err = app.Conn.GetCall(&ret, URI_ListStreams(hub, options))
 	return
 }
 
-func (app API_Client) GetStreamSegments(id string, start, end int64) (ret StreamSegmentList, err error) {
-	err = app.Conn.GetCall(&ret, URI_GetStreamSegments(id, start, end))
+func (app API_Client) GetStreamSegments(id string, options map[string]int64) (ret StreamSegmentList, err error) {
+	err = app.Conn.GetCall(&ret, URI_GetStreamSegments(id, options))
 	return
 }
