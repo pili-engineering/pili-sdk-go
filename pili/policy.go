@@ -12,8 +12,7 @@ import (
 
 func resolveStreamId(sid string) (hub, title string) {
 	a := strings.Split(sid, ".")
-	hub = a[1]
-	title = a[2]
+	hub, title = a[1], a[2]
 	return
 }
 
@@ -35,7 +34,7 @@ type PublishPolicy struct {
 
 func (p PublishPolicy) baseUrl() (url string) {
 	hub, title := resolveStreamId(p.StreamId)
-	url = fmt.Sprintf("rtmp://%s/%s/%s", RTMP_PUBLISH_HOST, hub, title)
+	url = fmt.Sprintf("rtmp://%s/%s/%s", getRtmpPublishHost(), hub, title)
 	return
 }
 
@@ -86,27 +85,27 @@ type PlayPolicy struct {
 
 func (p PlayPolicy) RtmpLiveUrl(preset string) (url string) {
 	hub, title := resolveStreamId(p.StreamId)
-	url = fmt.Sprintf("rtmp://%s/%s/%s", RTMP_PUBLISH_HOST, hub, title)
+	url = fmt.Sprintf("rtmp://%s/%s/%s", getRtmpPublishHost(), hub, title)
 	if preset != "" {
-		url = fmt.Sprintf("rtmp://%s/%s/%s@%s", RTMP_PUBLISH_HOST, hub, title, preset)
+		url = fmt.Sprintf("%s@%s", url, preset)
 	}
 	return
 }
 
 func (p PlayPolicy) HlsLiveUrl(preset string) (url string) {
 	hub, title := resolveStreamId(p.StreamId)
-	url = fmt.Sprintf("http://%s/%s/%s.m3u8", HLS_PLAY_HOST, hub, title)
+	url = fmt.Sprintf("http://%s/%s/%s.m3u8", getHlsPlayHost(), hub, title)
 	if preset != "" {
-		url = fmt.Sprintf("http://%s/%s/%s@%s.m3u8", HLS_PLAY_HOST, hub, title, preset)
+		url = fmt.Sprintf("http://%s/%s/%s@%s.m3u8", getHlsPlayHost(), hub, title, preset)
 	}
 	return
 }
 
 func (p PlayPolicy) HlsPlaybackUrl(start, end int64, preset string) (url string) {
 	hub, title := resolveStreamId(p.StreamId)
-	url = fmt.Sprintf("http://%s/%s/%s.m3u8?start=%d&end=%d", HLS_PLAY_HOST, hub, title, start, end)
+	url = fmt.Sprintf("http://%s/%s/%s.m3u8?start=%d&end=%d", getHlsPlayHost(), hub, title, start, end)
 	if preset != "" {
-		url = fmt.Sprintf("http://%s/%s/%s@%s.m3u8?start=%d&end=%d", HLS_PLAY_HOST, hub, title, preset, start, end)
+		url = fmt.Sprintf("http://%s/%s/%s@%s.m3u8?start=%d&end=%d", getHlsPlayHost(), hub, title, preset, start, end)
 	}
 	return
 }
