@@ -19,10 +19,10 @@ func main() {
 
 	// Create
 	postdata := map[string]interface{}{
-		"hub":             HUB,            // required
-		"title":           "stream_name",  // optional, default is auto-generated
-		"publishKey":      "secret_words", // optional, a secret key for signing the <publishToken>
-		"publishSecurity": "dynamic",      // optional, can be "dynamic" or "static", default is "dynamic"
+		"hub":             HUB,           // required
+		"title":           "streamname",  // optional, default is auto-generated
+		"publishKey":      "secretwords", // optional, a secret key for signing the <publishToken>
+		"publishSecurity": "dynamic",     // optional, can be "dynamic" or "static", default is "dynamic"
 	}
 	stream, err := app.CreateStream(postdata)
 	if err != nil {
@@ -74,7 +74,7 @@ func main() {
 
 	// Update
 	newdata := map[string]interface{}{
-		"publishKey":      "secret_words",
+		"publishKey":      "secretwords",
 		"publishSecurity": "dynamic",
 	}
 	stream, err = app.SetStream(stream.Id, newdata)
