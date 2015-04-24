@@ -1,6 +1,4 @@
-# PILI SDK for Go
-
-The PILI SDK for Go is a set of clients for PILI Services APIs, and is currently under development to implement full service coverage and other standard PILI SDK features.
+# Pili SDK for Golang
 
 ## Installing
 
@@ -80,7 +78,7 @@ func main() {
 
 
     // List exist streams
-    options := map[string]interface{
+    options := map[string]interface{}{
        "marker": "nextMarker", // string, optional
        "limit" : limitCount,   // int64,  optional
     }
@@ -89,7 +87,7 @@ func main() {
 
 
     // Get recording segments from a stream
-    options := map[string]int64{
+    options := map[string]int64{}{
        "start": startUnixTimeStamp, // int64, optional
        "end"  : endUnixTimeStamp,   // int64, optional
     }
