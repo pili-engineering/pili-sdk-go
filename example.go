@@ -1,14 +1,14 @@
 package main
 
 import (
-	"./pili"
+	"./pili" // or "github.com/pili-io/pili-sdk-go/pili"
 	"fmt"
 	"time"
 )
 
 const (
-	ACCESS_KEY = "ACCESS_KEY"
-	SECRET_KEY = "SECRET_KEY"
+	ACCESS_KEY = "YOUR_QINIU_ACCESS_KEY"
+	SECRET_KEY = "YOUR_QINIU_SECRET_KEY"
 	HUB        = "HUB_NAME"
 )
 
