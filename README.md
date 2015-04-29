@@ -8,7 +8,7 @@ $ go get github.com/pili-io/pili-sdk-go/pili
 
 ## Usage
 
-### Instantiate an Pili clien:
+### Instantiate an Pili client
 
 ```go
 
@@ -33,7 +33,7 @@ func main() {
 ```
 
 
-### Create a new strea:
+### Create a new stream
 
 ```go
 hub             := "YOUR_HUB_NAME" // required, <Hub> must be an exists one
@@ -50,7 +50,7 @@ fmt.Printf("Result:%+v\n", stream)
 ```
 
 
-### Get an exist strea:
+### Get an exist stream
 
 ```go
 stream, err = client.GetStream(stream.Id)
@@ -61,7 +61,7 @@ fmt.Printf("Result:%+v\n", stream)
 ```
 
 
-### Signing a RTMP publish UR:
+### Signing a RTMP publish URL
 
 ```go
 publish := pili.PublishPolicy{
@@ -74,7 +74,7 @@ fmt.Printf("Publish URL is:\n%+v\n\n", publish.Url())
 ```
 
 
-### Generate Play URL:
+### Generate Play URL
 
 ```go
 pili.RTMP_PLAY_HOST = "live.z1.glb.pili.qiniucdn.com" // required, replace with your customized domain
@@ -96,7 +96,7 @@ fmt.Printf("HLS 360P Playback URL:\n%+v\n\n", play.HlsPlaybackUrl(1429678551, 14
 ```
 
 
-### List stream:
+### List stream
 
 ```go
 hub    := "YOUR_HUB_NAME" // required
@@ -112,7 +112,7 @@ fmt.Printf("Result:%+v\n", result)
 ```
 
 
-### Get recording segments from an exist strea:
+### Get recording segments from an exist stream
 
 ```go
 var startTime int64 // optional
