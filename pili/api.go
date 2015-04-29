@@ -47,12 +47,12 @@ func URI_ListStreams(hub string, options map[string]interface{}) (httpurl string
 	return
 }
 
-func URI_GetStreamSegments(id string, options map[string]int64) (httpurl string) {
+func URI_GetStreamSegments(id string, options map[string]interface{}) (httpurl string) {
 	httpurl = fmt.Sprintf("%s/streams/%s/segments", API_BASE_URL, id)
-	if start, ok := options["start"]; ok && start > 0 {
+	if start, ok := options["start"]; ok && start != 0 {
 		httpurl = fmt.Sprintf("%s?start=%d", httpurl, start)
 	}
-	if end, ok := options["end"]; ok && end > 0 {
+	if end, ok := options["end"]; ok && end != 0 {
 		httpurl = fmt.Sprintf("%s&end=%d", httpurl, end)
 	}
 	return
@@ -86,7 +86,17 @@ type StreamSegmentList struct {
 
 // -----------------------------------------------------------------------------------------------------------
 
-func (app API_Client) CreateStream(data interface{}) (ret Stream, err error) {
+func (app API_Client) CreateStream(hub, title, publishKey, publishSecurity string) (ret Stream, err error) {
+	data := map[string]interface{}{"hub": hub}
+	if title != "" {
+		data["title"] = title
+	}
+	if publishKey != "" {
+		data["publishKey"] = publishKey
+	}
+	if publishSecurity != "" {
+		data["publishSecurity"] = publishSecurity
+	}
 	err = app.Conn.PostCall(&ret, URI_NewStream(), data)
 	return
 }
@@ -96,7 +106,11 @@ func (app API_Client) GetStream(id string) (ret Stream, err error) {
 	return
 }
 
-func (app API_Client) SetStream(id string, data interface{}) (ret Stream, err error) {
+func (app API_Client) SetStream(id, publishKey, publishSecurity string) (ret Stream, err error) {
+	data := map[string]interface{}{
+		"publishKey":      publishKey,
+		"publishSecurity": publishSecurity,
+	}
 	err = app.Conn.PostCall(&ret, URI_SetStream(id), data)
 	return
 }
@@ -106,12 +120,23 @@ func (app API_Client) DelStream(id string) (ret interface{}, err error) {
 	return
 }
 
-func (app API_Client) ListStreams(hub string, options map[string]interface{}) (ret StreamList, err error) {
+func (app API_Client) ListStreams(hub, marker string, limit int64) (ret StreamList, err error) {
+	options := map[string]interface{}{
+		"marker": marker,
+		"limit":  limit,
+	}
 	err = app.Conn.GetCall(&ret, URI_ListStreams(hub, options))
 	return
 }
 
-func (app API_Client) GetStreamSegments(id string, options map[string]int64) (ret StreamSegmentList, err error) {
+func (app API_Client) GetStreamSegments(id string, startTime, endTime int64) (ret StreamSegmentList, err error) {
+	options := map[string]interface{}{}
+	if startTime != 0 {
+		options["start"] = startTime
+	}
+	if endTime != 0 {
+		options["end"] = endTime
+	}
 	err = app.Conn.GetCall(&ret, URI_GetStreamSegments(id, options))
 	return
 }
