@@ -1,4 +1,4 @@
-# Pili SDK for Golang
+# Pili server-side library for Golang
 
 ## Installation
 
@@ -8,7 +8,7 @@ $ go get github.com/pili-io/pili-sdk-go/pili
 
 ## Usage
 
-### Instantiate an Pili client:
+### Instantiate an Pili clien:
 
 ```go
 
@@ -33,7 +33,7 @@ func main() {
 ```
 
 
-### Create a new stream:
+### Create a new strea:
 
 ```go
 hub             := "YOUR_HUB_NAME" // required, <Hub> must be an exists one
@@ -50,7 +50,7 @@ fmt.Printf("Result:%+v\n", stream)
 ```
 
 
-### Get an exist stream:
+### Get an exist strea:
 
 ```go
 stream, err = client.GetStream(stream.Id)
@@ -61,7 +61,7 @@ fmt.Printf("Result:%+v\n", stream)
 ```
 
 
-### Signing a RTMP publish URL:
+### Signing a RTMP publish UR:
 
 ```go
 publish := pili.PublishPolicy{
@@ -74,7 +74,7 @@ fmt.Printf("Publish URL is:\n%+v\n\n", publish.Url())
 ```
 
 
-### Generate Play URLs:
+### Generate Play URL:
 
 ```go
 pili.RTMP_PLAY_HOST = "live.z1.glb.pili.qiniucdn.com" // required, replace with your customized domain
@@ -96,7 +96,7 @@ fmt.Printf("HLS 360P Playback URL:\n%+v\n\n", play.HlsPlaybackUrl(1429678551, 14
 ```
 
 
-### List streams:
+### List stream:
 
 ```go
 hub    := "YOUR_HUB_NAME" // required
@@ -112,7 +112,7 @@ fmt.Printf("Result:%+v\n", result)
 ```
 
 
-###  Get recording segments from an exist stream:
+### Get recording segments from an exist strea:
 
 ```go
 var startTime int64 // optional
@@ -127,7 +127,7 @@ fmt.Printf("Result:%+v\n", segments)
 ```
 
 
-### Update an exist stream:
+### Update an exist stream
 
 ```go
 newPublishKey      := "new_secret_words"
@@ -145,9 +145,9 @@ fmt.Printf("Result:%+v\n", stream)
 ### Delete stream
 
 ```go
-	del, err := client.DelStream(stream.Id)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Result:%+v\n", del)
+del, err := client.DelStream(stream.Id)
+if err != nil {
+    panic(err)
+}
+fmt.Printf("Result:%+v\n", del)
 ```
