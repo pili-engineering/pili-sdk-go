@@ -26,6 +26,7 @@ func Sign(secret, data []byte) (token string) {
 // ----------------------------------------------------------
 
 type PublishPolicy struct {
+	RtmpPublishHost       string // required, replace with your customized domain
 	StreamId              string // required, format: <zone>.<hub>.<title>
 	StreamPublishKey      string // required, a secret key for signing the <publishToken>
 	StreamPublishSecurity string // required, can be "dynamic" or "static"
@@ -34,7 +35,7 @@ type PublishPolicy struct {
 
 func (p PublishPolicy) baseUrl() (url string) {
 	hub, title := resolvePath(p.StreamId)
-	url = fmt.Sprintf("rtmp://%s/%s/%s", getRtmpPublishHost(), hub, title)
+	url = fmt.Sprintf("rtmp://%s/%s/%s", p.RtmpPublishHost, hub, title)
 	return
 }
 
@@ -80,12 +81,14 @@ func (p PublishPolicy) Url() (url string) {
 // ----------------------------------------------------------
 
 type PlayPolicy struct {
-	StreamId string // required, format: <zone>.<hub>.<title>
+	RtmpPlayHost string // required, replace with your customized domain
+	HlsPlayHost  string // required, replace with your customized domain
+	StreamId     string // required, format: <zone>.<hub>.<title>
 }
 
 func (p PlayPolicy) RtmpLiveUrl(preset string) (url string) {
 	hub, title := resolvePath(p.StreamId)
-	url = fmt.Sprintf("rtmp://%s/%s/%s", getRtmpPublishHost(), hub, title)
+	url = fmt.Sprintf("rtmp://%s/%s/%s", p.RtmpPlayHost, hub, title)
 	if preset != "" {
 		url = fmt.Sprintf("%s@%s", url, preset)
 	}
@@ -94,18 +97,18 @@ func (p PlayPolicy) RtmpLiveUrl(preset string) (url string) {
 
 func (p PlayPolicy) HlsLiveUrl(preset string) (url string) {
 	hub, title := resolvePath(p.StreamId)
-	url = fmt.Sprintf("http://%s/%s/%s.m3u8", getHlsPlayHost(), hub, title)
+	url = fmt.Sprintf("http://%s/%s/%s.m3u8", p.HlsPlayHost, hub, title)
 	if preset != "" {
-		url = fmt.Sprintf("http://%s/%s/%s@%s.m3u8", getHlsPlayHost(), hub, title, preset)
+		url = fmt.Sprintf("http://%s/%s/%s@%s.m3u8", p.HlsPlayHost, hub, title, preset)
 	}
 	return
 }
 
 func (p PlayPolicy) HlsPlaybackUrl(start, end int64, preset string) (url string) {
 	hub, title := resolvePath(p.StreamId)
-	url = fmt.Sprintf("http://%s/%s/%s.m3u8?start=%d&end=%d", getHlsPlayHost(), hub, title, start, end)
+	url = fmt.Sprintf("http://%s/%s/%s.m3u8?start=%d&end=%d", p.HlsPlayHost, hub, title, start, end)
 	if preset != "" {
-		url = fmt.Sprintf("http://%s/%s/%s@%s.m3u8?start=%d&end=%d", getHlsPlayHost(), hub, title, preset, start, end)
+		url = fmt.Sprintf("http://%s/%s/%s@%s.m3u8?start=%d&end=%d", p.HlsPlayHost, hub, title, preset, start, end)
 	}
 	return
 }
