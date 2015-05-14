@@ -7,9 +7,17 @@ import (
 )
 
 const (
-	ACCESS_KEY = "YOUR_ACCESS_KEY"
-	SECRET_KEY = "YOUR_SECRET_KEY"
-	HUB        = "YOUR_HUB_NAME"
+	// Replace with your customized domains
+	RTMP_PUBLISH_HOST = "xxx.pub.z1.pili.qiniup.com"
+	RTMP_PLAY_HOST    = "xxx.live1.z1.pili.qiniucdn.com"
+	HLS_PLAY_HOST     = "xxx.hls1.z1.pili.qiniucdn.com"
+
+	// Replace with your keys here
+	ACCESS_KEY = "QiniuAccessKey"
+	SECRET_KEY = "QiniuSecretKey"
+
+	// Replace with your hub name
+	HUB = "hubName"
 )
 
 func main() {
@@ -19,7 +27,7 @@ func main() {
 	client := pili.NewClient(creds)
 
 	// Create a new stream
-	hub := HUB            // required, <Hub> must be an exists one
+	hub := HUB            // required, hub must be an exists one
 	title := ""           // optional, default is auto-generated
 	publishKey := ""      // optional, a secret key for signing the <publishToken>, default is auto-generated
 	publishSecurity := "" // optional, can be "dynamic" or "static", default is "dynamic"
@@ -43,15 +51,15 @@ func main() {
 		StreamId:              stream.Id,              // required
 		StreamPublishKey:      stream.PublishKey,      // required, a secret key for signing the <publishToken>
 		StreamPublishSecurity: stream.PublishSecurity, // required, can be "dynamic" or "static"
+		RtmpPublishHost:       RTMP_PUBLISH_HOST,      // required, replace with your customized domain
 	}
 	fmt.Printf("Publish URL is:\n%+v\n\n", publish.Url())
 
 	// Generate Play URLs
-	pili.RTMP_PLAY_HOST = "live.z1.glb.pili.qiniucdn.com"
-	pili.HLS_PLAY_HOST = "hls1.z1.glb.pili.qiniuapi.com"
-
 	play := pili.PlayPolicy{
-		StreamId: stream.Id, // required
+		StreamId:     stream.Id,      // required
+		RtmpPlayHost: RTMP_PLAY_HOST, // required, replace with your customized domain
+		HlsPlayHost:  HLS_PLAY_HOST,  // required, replace with your customized domain
 	}
 
 	preset := "" // optional, just like '720p', '480p', '360p', '240p'. All presets should be defined first.
