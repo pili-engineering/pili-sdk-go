@@ -78,8 +78,8 @@ fmt.Printf("Result:%+v\n", stream)
 
 ```go
 var nonce int64
-publishUrl := stream.RtmpPublishUrl(RTMP_PUBLISH_HOST, nonce)
-fmt.Printf("RTMP Publish URL is:\n%+v\n\n", publishUrl)
+rtmpPublishUrl := stream.RtmpPublishUrl(RTMP_PUBLISH_HOST, nonce)
+fmt.Printf("RTMP Publish URL is:\n%+v\n\n", rtmpPublishUrl)
 ```
 
 
@@ -88,6 +88,8 @@ fmt.Printf("RTMP Publish URL is:\n%+v\n\n", publishUrl)
 ```go
 // optional, like '720p', '480p', '360p', '240p'. All profiles should be defined first.
 profile := "480p"
+// or
+profile := ""
 
 rtmpLiveUrl := stream.RtmpLiveUrl(RTMP_PLAY_HOST, profile)
 fmt.Printf("RTMP Play URL:\n%+v\n\n", rtmpLiveUrl)
@@ -129,7 +131,7 @@ fmt.Printf("Result:%+v\n", result)
 ```
 
 
-### Get recording segments from an exist stream
+### Get recording segments
 
 ```go
 var startTime int64 // optional
