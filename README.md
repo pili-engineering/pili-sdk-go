@@ -18,17 +18,17 @@ import (
 )
 
 const (
-	// Replace with your customized domains
-	RTMP_PUBLISH_HOST = "xxx.pub.z1.pili.qiniup.com"
-	RTMP_PLAY_HOST    = "xxx.live1.z1.pili.qiniucdn.com"
-	HLS_PLAY_HOST     = "xxx.hls1.z1.pili.qiniucdn.com"
-
 	// Replace with your keys here
 	ACCESS_KEY = "QiniuAccessKey"
 	SECRET_KEY = "QiniuSecretKey"
 
 	// Replace with your hub name
 	HUB = "hubName"
+
+	// Replace with your customized domains
+	RTMP_PUBLISH_HOST = "xxx.pub.z1.pili.qiniup.com"
+	RTMP_PLAY_HOST    = "xxx.live1.z1.pili.qiniucdn.com"
+	HLS_PLAY_HOST     = "xxx.hls1.z1.pili.qiniucdn.com"
 )
 ```
 
