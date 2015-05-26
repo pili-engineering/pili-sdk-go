@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	SDK_VERSION      = "1.0.2"
+	SDK_VERSION      = "1.1.0"
 	API_VERSION      = "v1"
 	DEFAULT_API_HOST = "pili.qiniuapi.com"
 )

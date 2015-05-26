@@ -45,31 +45,30 @@ func main() {
 	}
 	fmt.Printf("Result:%+v\n", stream)
 
-	// Signing a RTMP publish URL
-	publish := pili.PublishPolicy{
-		Nonce:                 time.Now().UnixNano(),  // optional, for "dynamic" only, default is: time.Now().UnixNano()
-		StreamId:              stream.Id,              // required
-		StreamPublishKey:      stream.PublishKey,      // required, a secret key for signing the <publishToken>
-		StreamPublishSecurity: stream.PublishSecurity, // required, can be "dynamic" or "static"
-		RtmpPublishHost:       RTMP_PUBLISH_HOST,      // required, replace with your customized domain
+	// Get RTMP publish URL
+	var nonce int64
+	rtmpPublishUrl := stream.RtmpPublishUrl(RTMP_PUBLISH_HOST, nonce)
+	fmt.Printf("RTMP Publish URL is:\n%+v\n\n", rtmpPublishUrl)
+
+	// Get RTMP and HLS play URL
+	profile := "" // optional, like '720p', '480p', '360p', '240p'. All profiles should be defined first.
+	rtmpLiveUrl := stream.RtmpLiveUrl(RTMP_PLAY_HOST, profile)
+	fmt.Printf("RTMP Play URL:\n%+v\n\n", rtmpLiveUrl)
+
+	hlsLiveUrl := stream.HlsLiveUrl(HLS_PLAY_HOST, profile)
+	fmt.Printf("HLS Play URL:\n%+v\n\n", hlsLiveUrl)
+
+	startTime := time.Now().Unix() - 3600 // required
+	endTime := time.Now().Unix()          // required
+	hlsPlaybackUrl := stream.HlsPlaybackUrl(HLS_PLAY_HOST, profile, startTime, endTime)
+	fmt.Printf("HLS Playback URL:\n%+v\n\n", hlsPlaybackUrl)
+
+	// Get status
+	streamStatus, err := client.GetStreamStatus(stream.Id)
+	if err != nil {
+		panic(err)
 	}
-	fmt.Printf("Publish URL is:\n%+v\n\n", publish.Url())
-
-	// Generate Play URLs
-	play := pili.PlayPolicy{
-		StreamId:     stream.Id,      // required
-		RtmpPlayHost: RTMP_PLAY_HOST, // required, replace with your customized domain
-		HlsPlayHost:  HLS_PLAY_HOST,  // required, replace with your customized domain
-	}
-
-	preset := "" // optional, just like '720p', '480p', '360p', '240p'. All presets should be defined first.
-	fmt.Printf("RTMP Play URL:\n%+v\n\n", play.RtmpLiveUrl(preset))
-	fmt.Printf("HLS Play URL:\n%+v\n\n", play.HlsLiveUrl(preset))
-	fmt.Printf("HLS Playback URL:\n%+v\n\n", play.HlsPlaybackUrl(1429678551, 1429689551, preset))
-
-	fmt.Printf("RTMP 720P Play URL:\n%+v\n\n", play.RtmpLiveUrl("720p"))
-	fmt.Printf("HLS 480P Play URL:\n%+v\n\n", play.HlsLiveUrl("480p"))
-	fmt.Printf("HLS 360P Playback URL:\n%+v\n\n", play.HlsPlaybackUrl(1429678551, 1429689551, "360p"))
+	fmt.Printf("Result:%+v\n", streamStatus)
 
 	// List streams
 	hub = HUB       // required
@@ -82,8 +81,8 @@ func main() {
 	fmt.Printf("Result:%+v\n", result1)
 
 	// Get recording segments from an exist stream
-	var startTime int64 // optional
-	var endTime int64   // optional
+	// var startTime int64 // optional
+	// var endTime int64   // optional
 	result2, err := client.GetStreamSegments(stream.Id, startTime, endTime)
 	if err != nil {
 		panic(err)
@@ -93,7 +92,8 @@ func main() {
 	// Update an exist stream
 	newPublishKey := "new_secret_words"
 	newPublishSecurity := "dynamic"
-	stream, err = client.SetStream(stream.Id, newPublishKey, newPublishSecurity)
+	disabled := true
+	stream, err = client.SetStream(stream.Id, newPublishKey, newPublishSecurity, disabled)
 	if err != nil {
 		panic(err)
 	}

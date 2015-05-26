@@ -58,6 +58,10 @@ func URI_GetStreamSegments(id string, options map[string]interface{}) (httpurl s
 	return
 }
 
+func URI_GetStreamStatus(id string) string {
+	return fmt.Sprintf("%s/streams/%s/status", API_BASE_URL, id)
+}
+
 // -----------------------------------------------------------------------------------------------------------
 
 type Stream struct {
@@ -68,6 +72,7 @@ type Stream struct {
 	Title           string    `json:"title"`
 	PublishKey      string    `json:"publishKey"`
 	PublishSecurity string    `json:"publishSecurity"`
+	Disabled        bool      `json:"disabled"`
 }
 
 type StreamList struct {
@@ -82,6 +87,11 @@ type StreamSegment struct {
 
 type StreamSegmentList struct {
 	Segments []*StreamSegment `json:"segments"`
+}
+
+type StreamStatus struct {
+	Addr   string `json:"addr"`
+	Status string `json:"status"`
 }
 
 // -----------------------------------------------------------------------------------------------------------
@@ -106,10 +116,16 @@ func (app API_Client) GetStream(id string) (ret Stream, err error) {
 	return
 }
 
-func (app API_Client) SetStream(id, publishKey, publishSecurity string) (ret Stream, err error) {
+func (app API_Client) GetStreamStatus(id string) (ret StreamStatus, err error) {
+	err = app.Conn.GetCall(&ret, URI_GetStreamStatus(id))
+	return
+}
+
+func (app API_Client) SetStream(id, publishKey, publishSecurity string, disabled bool) (ret Stream, err error) {
 	data := map[string]interface{}{
 		"publishKey":      publishKey,
 		"publishSecurity": publishSecurity,
+		"disabled":        disabled,
 	}
 	err = app.Conn.PostCall(&ret, URI_SetStream(id), data)
 	return
