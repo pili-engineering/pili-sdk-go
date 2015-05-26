@@ -18,17 +18,17 @@ import (
 )
 
 const (
-	// Replace with your customized domains
-	RTMP_PUBLISH_HOST = "xxx.pub.z1.pili.qiniup.com"
-	RTMP_PLAY_HOST    = "xxx.live1.z1.pili.qiniucdn.com"
-	HLS_PLAY_HOST     = "xxx.hls1.z1.pili.qiniucdn.com"
-
 	// Replace with your keys here
 	ACCESS_KEY = "QiniuAccessKey"
 	SECRET_KEY = "QiniuSecretKey"
 
 	// Replace with your hub name
 	HUB = "hubName"
+
+	// Replace with your customized domains
+	RTMP_PUBLISH_HOST = "xxx.pub.z1.pili.qiniup.com"
+	RTMP_PLAY_HOST    = "xxx.live1.z1.pili.qiniucdn.com"
+	HLS_PLAY_HOST     = "xxx.hls1.z1.pili.qiniucdn.com"
 )
 ```
 
@@ -64,7 +64,7 @@ fmt.Printf("Result:%+v\n", stream)
 ```
 
 
-### Get an exist stream
+### Get stream
 
 ```go
 stream, err = client.GetStream(stream.Id)
@@ -74,43 +74,44 @@ if err != nil {
 fmt.Printf("Result:%+v\n", stream)
 ```
 
-
-### Signing a RTMP publish URL
+### Get RTMP publish URL
 
 ```go
-publish := pili.PublishPolicy{
-    Nonce:                 time.Now().UnixNano(),  // optional, for "dynamic" only, default is: time.Now().UnixNano()
-    StreamId:              stream.Id,              // required
-    StreamPublishKey:      stream.PublishKey,      // required, a secret key for signing the <publishToken>
-    StreamPublishSecurity: stream.PublishSecurity, // required, can be "dynamic" or "static"
-    RtmpPublishHost:       RTMP_PUBLISH_HOST,      // required, replace with your customized domain
-}
-fmt.Printf("Publish URL is:\n%+v\n\n", publish.Url())
+var nonce int64
+rtmpPublishUrl := stream.RtmpPublishUrl(RTMP_PUBLISH_HOST, nonce)
+fmt.Printf("RTMP Publish URL is:\n%+v\n\n", rtmpPublishUrl)
 ```
 
 
-### Generate Play URL
+### Get RTMP and HLS play URL
 
 ```go
-play := pili.PlayPolicy{
-    StreamId:     stream.Id,      // required
-    RtmpPlayHost: RTMP_PLAY_HOST, // required, replace with your customized domain
-    HlsPlayHost:  HLS_PLAY_HOST,  // required, replace with your customized domain
+// optional, like '720p', '480p', '360p', '240p'. All profiles should be defined first.
+profile := "480p"
+// or
+profile := ""
+
+rtmpLiveUrl := stream.RtmpLiveUrl(RTMP_PLAY_HOST, profile)
+fmt.Printf("RTMP Play URL:\n%+v\n\n", rtmpLiveUrl)
+
+hlsLiveUrl := stream.HlsLiveUrl(HLS_PLAY_HOST, profile)
+fmt.Printf("HLS Play URL:\n%+v\n\n", hlsLiveUrl)
+
+startTime := time.Now().Unix() - 3600 // required
+endTime := time.Now().Unix()          // required
+hlsPlaybackUrl := stream.HlsPlaybackUrl(HLS_PLAY_HOST, profile, startTime, endTime)
+fmt.Printf("HLS Playback URL:\n%+v\n\n", hlsPlaybackUrl)
+```
+
+
+### Get status
+
+```go
+streamStatus, err := client.GetStreamStatus(stream.Id)
+if err != nil {
+    panic(err)
 }
-
-play := pili.PlayPolicy{
-    StreamId: stream.Id, // required
-}
-
-preset := "" // optional, just like '720p', '480p', '360p', '240p'. All presets should be defined first.
-
-fmt.Printf("RTMP Play URL:\n%+v\n\n", play.RtmpLiveUrl(preset))
-fmt.Printf("HLS Play URL:\n%+v\n\n", play.HlsLiveUrl(preset))
-fmt.Printf("HLS Playback URL:\n%+v\n\n", play.HlsPlaybackUrl(1429678551, 1429689551, preset))
-
-fmt.Printf("RTMP 720P Play URL:\n%+v\n\n", play.RtmpLiveUrl("720p"))
-fmt.Printf("HLS 480P Play URL:\n%+v\n\n", play.HlsLiveUrl("480p"))
-fmt.Printf("HLS 360P Playback URL:\n%+v\n\n", play.HlsPlaybackUrl(1429678551, 1429689551, "360p"))
+fmt.Printf("Result:%+v\n", streamStatus)
 ```
 
 
@@ -130,7 +131,7 @@ fmt.Printf("Result:%+v\n", result)
 ```
 
 
-### Get recording segments from an exist stream
+### Get recording segments
 
 ```go
 var startTime int64 // optional
@@ -150,8 +151,9 @@ fmt.Printf("Result:%+v\n", segments)
 ```go
 newPublishKey      := "new_secret_words"
 newPublishSecurity := "dynamic"
+disabled           := true
 
-stream, err = client.SetStream(stream.Id, newPublishKey, newPublishSecurity)
+stream, err = client.SetStream(stream.Id, newPublishKey, newPublishSecurity, disabled)
 if err != nil {
     panic(err)
 }
