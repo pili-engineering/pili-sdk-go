@@ -74,7 +74,7 @@ if err != nil {
 fmt.Printf("Result:%+v\n", stream)
 ```
 
-### Get RTMP publish URL
+### Generate a RTMP publish URL
 
 ```go
 var nonce int64
@@ -82,24 +82,34 @@ rtmpPublishUrl := stream.RtmpPublishUrl(RTMP_PUBLISH_HOST, nonce)
 fmt.Printf("RTMP Publish URL is:\n%+v\n\n", rtmpPublishUrl)
 ```
 
-
-### Get RTMP and HLS play URL
+### Generate RTMP live play URL
 
 ```go
-// optional, like '720p', '480p', '360p', '240p'. All profiles should be defined first.
-profile := "480p"
-// or
 profile := ""
+// or
+profile := "480p" // optional, all profiles should be defined first.
 
 rtmpLiveUrl := stream.RtmpLiveUrl(RTMP_PLAY_HOST, profile)
-fmt.Printf("RTMP Play URL:\n%+v\n\n", rtmpLiveUrl)
 
+fmt.Printf("RTMP Play URL:\n%+v\n\n", rtmpLiveUrl)
+```
+
+### Generate HLS live play URL
+
+```go
 hlsLiveUrl := stream.HlsLiveUrl(HLS_PLAY_HOST, profile)
 fmt.Printf("HLS Play URL:\n%+v\n\n", hlsLiveUrl)
+```
 
+
+### Generate HLS playback URL
+
+```go
 startTime := time.Now().Unix() - 3600 // required
 endTime := time.Now().Unix()          // required
+
 hlsPlaybackUrl := stream.HlsPlaybackUrl(HLS_PLAY_HOST, profile, startTime, endTime)
+
 fmt.Printf("HLS Playback URL:\n%+v\n\n", hlsPlaybackUrl)
 ```
 
