@@ -64,6 +64,7 @@ func URI_GetStreamStatus(id string) string {
 
 // -----------------------------------------------------------------------------------------------------------
 
+/*
 type Stream struct {
 	Id              string    `json:"id"`
 	Hub             string    `json:"hub"`
@@ -73,6 +74,23 @@ type Stream struct {
 	PublishKey      string    `json:"publishKey"`
 	PublishSecurity string    `json:"publishSecurity"`
 	Disabled        bool      `json:"disabled"`
+}
+*/
+
+type Stream struct {
+	ID              string    `json:"id"`
+	CreatedAt       time.Time `json:"createdAt"`
+	UpdatedAt       time.Time `json:"updatedAt"`
+	Title           string    `json:"title"`
+	Hub             string    `json:"hub"`
+	Disabled        bool      `json:"disabled"`
+	PublishKey      string    `json:"publishKey"`
+	PublishSecurity string    `json:"publishSecurity"`
+	Profiles        []string  `json:"profiles,omitempty"`
+	Hosts           struct {
+		Publish map[string]string `json:"publish,omitempty"`
+		Play    map[string]string `json:"play,omitempty"`
+	} `json:"hosts,omitempty"`
 }
 
 type StreamList struct {
