@@ -6,15 +6,18 @@ import (
 )
 
 const (
-	SDK_VERSION      = "1.1.0"
+	SDK_VERSION      = "1.2.0"
 	API_VERSION      = "v1"
 	DEFAULT_API_HOST = "pili.qiniuapi.com"
+	ORIGIN           = "ORIGIN"
 )
 
 var (
 	API_HOST  string
 	USE_HTTPS bool
 )
+
+var API_BASE_URL = fmt.Sprintf("%s://%s/%s", getHttpScheme(), getApiHost(), API_VERSION)
 
 func UserAgent() string {
 	return fmt.Sprintf("pili-sdk-go/%s %s %s/%s", SDK_VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH)

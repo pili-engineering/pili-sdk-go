@@ -2,7 +2,7 @@
 
 ## Features
 
-- [x] Stream operations (Create, Delete, Update, Get)
+- [x] Stream operations (Create, Get, Update, Delete, Disable, Enable)
 - [x] Get Streams list
 - [x] Get Stream status
 - [x] Get Stream segments
@@ -23,6 +23,8 @@
 	- [Stream](#Stream)
     	- [Update a stream](#Update-a-stream)
 		- [Delete a stream](#Delete-a-stream)
+		- [Disable a stream](#Disable-a-stream)
+		- [Enable a stream](#Enable-a-stream)
 		- [Get stream segments](#Get-stream-segments)
 		- [Get stream status](#Get-stream-status)
 		- [Generate RTMP publish URL](#Generate-RTMP-publish-URL)
@@ -88,21 +90,21 @@ if err != nil {
 fmt.Println(stream)
 /*
 {
-	ID:z1.live.5544ee03fb16df2e330001c5 
-	CreatedAt:2015-05-02 23:32:19.608 +0800 +0800 
-	UpdatedAt:2015-05-02 23:32:19.608 +0800 +0800 
-	Title:5544ee03fb16df2e330001c5 
-	Hub:live 
-	Disabled:false 
-	PublishKey:2769c4753656d244 
-	PublishSecurity:dynamic 
-	Profiles:[720p 480p 360p 240p] 
+	ID:z1.live.5544ee03fb16df2e330001c5
+	CreatedAt:2015-05-02 23:32:19.608 +0800 +0800
+	UpdatedAt:2015-05-02 23:32:19.608 +0800 +0800
+	Title:5544ee03fb16df2e330001c5
+	Hub:live
+	Disabled:false
+	PublishKey:2769c4753656d244
+	PublishSecurity:dynamic
+	Profiles:[720p 480p 360p 240p]
 	Hosts:{
 		Publish:map[
 			rtmp:5icsm3.pub.z1.pili.qiniup.com
-		] 
+		]
 		Play:map[
-			hls:5icsm3.hls1.z1.pili.qiniucdn.com 
+			hls:5icsm3.hls1.z1.pili.qiniucdn.com
 			rtmp:5icsm3.live1.z1.pili.qiniucdn.com
 		]
 	}
@@ -141,21 +143,21 @@ for _, stream := range s.Items {
 }
 /*
 &{
-	ID:z1.live.5544ee03fb16df2e330001c5 
-	CreatedAt:2015-05-02 23:32:19.608 +0800 +0800 
-	UpdatedAt:2015-05-02 23:32:19.608 +0800 +0800 
-	Title:5544ee03fb16df2e330001c5 
-	Hub:live 
-	Disabled:false 
-	PublishKey:2769c4753656d244 
-	PublishSecurity:dynamic 
-	Profiles:[720p 480p 360p 240p] 
+	ID:z1.live.5544ee03fb16df2e330001c5
+	CreatedAt:2015-05-02 23:32:19.608 +0800 +0800
+	UpdatedAt:2015-05-02 23:32:19.608 +0800 +0800
+	Title:5544ee03fb16df2e330001c5
+	Hub:live
+	Disabled:false
+	PublishKey:2769c4753656d244
+	PublishSecurity:dynamic
+	Profiles:[720p 480p 360p 240p]
 	Hosts:{
 		Publish:map[
 			rtmp:5icsm3.pub.z1.pili.qiniup.com
-		] 
+		]
 		Play:map[
-			hls:5icsm3.hls1.z1.pili.qiniucdn.com 
+			hls:5icsm3.hls1.z1.pili.qiniucdn.com
 			rtmp:5icsm3.live1.z1.pili.qiniucdn.com
 		]
 	}
@@ -172,7 +174,6 @@ for _, stream := range s.Items {
 options := pili.OptionalArguments { // optional
   PublishKey     : "publishKey",    // optional
   PublishSecrity : "dynamic",       // optional
-  Disabled       : false            // optional
 }
 
 stream, err := stream.Update(&options)
@@ -190,6 +191,28 @@ _, err := stream.Delete()
 if err != nil {
 	fmt.Println("error:", err)
 }
+```
+
+#### Disable a stream
+
+```go
+stream, err := stream.Disable()
+if err != nil {
+	fmt.Println("error:", err)
+}
+
+fmt.Println(stream)
+```
+
+#### Enable a stream
+
+```go
+stream, err := stream.Enable()
+if err != nil {
+	fmt.Println("error:", err)
+}
+
+fmt.Println(stream)
 ```
 
 #### Get stream segments
@@ -264,10 +287,10 @@ fmt.Println(urls["ORIGIN"])
 #### Generate HLS playback URLs
 
 ```go
-// startTime: required, in second, unix timestamp
-// endTime  : required, in second, unix timestamp
+// start: required, in second, unix timestamp
+// end  : required, in second, unix timestamp
 
-urls, err: = stream.HlsPlaybackUrls(startTime, endTime)
+urls, err: = stream.HlsPlaybackUrls(start, end)
 if err != nil {
 	fmt.Println("error:", err)
 }
