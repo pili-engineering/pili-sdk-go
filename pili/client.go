@@ -58,5 +58,15 @@ func (c Client) ListStreams(args OptionalArguments) (ret StreamList, err error) 
 	}
 
 	err = c.conn.GetCall(&ret, url)
+
+	streams := make([]*Stream, len(ret.Items))
+
+	for _, stream := range ret.Items {
+		stream.conn = c.conn
+		streams = append(streams, stream)
+	}
+
+	ret.Items = streams
+
 	return
 }
