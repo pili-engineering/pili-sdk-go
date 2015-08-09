@@ -20,7 +20,7 @@
     - [x] stream.HlsPlaybackUrls(int64(start), int64(end))
     - [x] stream.Delete()
 
-## Content
+## Contents
 
 - [Installation](#Installation)
 - [Usage](#Usage)
