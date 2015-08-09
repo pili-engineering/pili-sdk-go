@@ -24,7 +24,7 @@ func main() {
 	// Create a new stream
 	options := pili.OptionalArguments{ // optional
 		Title:           "stream_name",       // optional, auto-generated as default
-		PublishKey:      "some_secret_words", // optional, a secret key for signing the `publishToken`, default is auto-generated
+		PublishKey:      "some_secret_words", // optional, auto-generated as default
 		PublishSecurity: "static",            // optional, can be "dynamic" or "static", "dynamic" as default
 	}
 	stream, err := client.CreateStream(options)
@@ -51,11 +51,7 @@ func main() {
 	}
 	fmt.Println("ListStreams:\n", listResult)
 	for _, stream := range listResult.Items {
-		streamRefreshed, err := stream.Refresh()
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
-		fmt.Println("Stream Refreshed:\n", streamRefreshed)
+		fmt.Println("Stream:\n", stream)
 	}
 
 	// To JSON String
@@ -75,6 +71,13 @@ func main() {
 		fmt.Println("Error:", err)
 	}
 	fmt.Println("Stream Updated:\n", stream)
+
+	// Refresh a stream
+	stream, err = stream.Refresh()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Stream Refreshed:\n", stream)
 
 	// Disable a stream
 	stream, err = stream.Disable()
@@ -121,7 +124,7 @@ func main() {
 	for k, v := range urls {
 		fmt.Printf("%s:%s\n", k, v)
 	}
-	fmt.Println("Original RtmpLiveUrl:\n", urls["ORIGIN"])
+	fmt.Println("Original RtmpLiveUrl:\n", urls[pili.ORIGIN])
 
 	// Generate HLS live play URLs
 	urls, err = stream.HlsLiveUrls()
@@ -132,7 +135,7 @@ func main() {
 	for k, v := range urls {
 		fmt.Printf("%s:%s\n", k, v)
 	}
-	fmt.Println("Original HlsLiveUrl:\n", urls["ORIGIN"])
+	fmt.Println("Original HlsLiveUrl:\n", urls[pili.ORIGIN])
 
 	// Generate HLS playback URLs
 	start := 1439121809
@@ -145,7 +148,7 @@ func main() {
 	for k, v := range urls {
 		fmt.Printf("%s:%s\n", k, v)
 	}
-	fmt.Println("Original HlsPlaybackUrl:\n", urls["ORIGIN"])
+	fmt.Println("Original HlsPlaybackUrl:\n", urls[pili.ORIGIN])
 
 	// Delete a stream
 	deleteResult, err := stream.Delete()

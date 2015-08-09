@@ -211,7 +211,7 @@ fmt.Println("Stream Updated:\n", stream)
 #### Refresh a stream
 
 ```go
-stream, err := stream.Refresh()
+stream, err = stream.Refresh()
 if err != nil {
     fmt.Println("Error:", err)
 }
@@ -283,7 +283,7 @@ fmt.Println("RtmpLiveUrls:")
 for k, v := range urls {
     fmt.Printf("%s:%s\n", k, v)
 }
-fmt.Println("Original RtmpLiveUrl:\n", urls["ORIGIN"])
+fmt.Println("Original RtmpLiveUrl:\n", urls[pili.ORIGIN])
 // "rtmp://customized.example.com/hub/title"
 ```
 
@@ -298,7 +298,7 @@ fmt.Println("HlsLiveUrls:")
 for k, v := range urls {
     fmt.Printf("%s:%s\n", k, v)
 }
-fmt.Println("Original HlsLiveUrl:\n", urls["ORIGIN"])
+fmt.Println("Original HlsLiveUrl:\n", urls[pili.ORIGIN])
 // "http://customized.example.com/hub/title.m3u8"
 ```
 
@@ -315,7 +315,7 @@ fmt.Println("HlsPlaybackUrls:")
 for k, v := range urls {
     fmt.Printf("%s:%s\n", k, v)
 }
-fmt.Println("Original HlsPlaybackUrl:\n", urls["ORIGIN"])
+fmt.Println("Original HlsPlaybackUrl:\n", urls[pili.ORIGIN])
 // "http://customized.example.com/hub/title.m3u8?start=1439121809&end=1439125409"
 ```
 
