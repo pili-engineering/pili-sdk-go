@@ -6,7 +6,7 @@
     - [x] client.CreateStream(options)
     - [x] client.GetStream(stream.Id)
     - [x] client.ListStreams(options)
-- Stream operations
+- Stream operations else
     - [x] stream.ToJSONString()
     - [x] stream.Update(options)
     - [x] stream.Refresh()
