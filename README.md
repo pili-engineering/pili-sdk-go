@@ -43,6 +43,7 @@
 		- [Generate RTMP live play URL](#Generate-RTMP-live-play-URL)
 		- [Generate HLS live play URL](#Generate-HLS-live-play-URL)
 		- [Generate HLS playback URL](#Generate-HLS-playback-URL)
+		- [Save Stream as](#Save-Stream-as)
 		- [Delete a stream](#Delete-a-stream)
 - [History](#History)
 
