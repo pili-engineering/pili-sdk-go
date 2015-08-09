@@ -2,13 +2,21 @@
 
 ## Features
 
-- [x] Stream operations (Create, Get, Update, Disable, Enable, Refresh, Delete)
-- [x] Get Streams list
-- [x] Get Stream status
-- [x] Get Stream segments
-- [x] Generate RTMP publish URL
-- [x] Generate RTMP and HLS live play URL
-- [x] Generate HLS playback URL
+- [x] client.CreateStream(options)
+- [x] client.GetStream(stream.Id)
+- [x] client.ListStreams(options)
+- [x] stream.ToJSONString()
+- [x] stream.Update(options)
+- [x] stream.Refresh()
+- [x] stream.Disable()
+- [x] stream.Enable()
+- [x] stream.Segments(options)
+- [x] stream.Status()
+- [x] stream.RtmpPublishUrl()
+- [x] stream.RtmpLiveUrls()
+- [x] stream.HlsLiveUrls()
+- [x] stream.HlsPlaybackUrls(int64(start), int64(end))
+- [x] stream.Delete()
 
 ## Content
 
