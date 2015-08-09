@@ -10,8 +10,18 @@ import (
 	"time"
 )
 
-func (s Stream) ToJSONString() (jsonBlob string) {
-	jsonBytes, _ := json.Marshal(s)
+func (s Stream) Refresh() (stream Stream, err error) {
+	url := fmt.Sprintf("%s/streams/%s", API_BASE_URL, s.Id)
+	err = s.conn.GetCall(&stream, url)
+	if err != nil {
+		return
+	}
+	stream.conn = s.conn
+	return
+}
+
+func (s Stream) ToJsonString() (jsonBlob string, err error) {
+	jsonBytes, err := json.Marshal(s)
 	jsonBlob = string(jsonBytes)
 	return
 }
@@ -120,6 +130,7 @@ func (s Stream) sign(secret, data []byte) (token string) {
 // --------------------------------------------------------------------------------
 
 func (s Stream) RtmpLiveUrls() (urls map[string]string, err error) {
+	urls = make(map[string]string)
 	url := fmt.Sprintf("rtmp://%s/%s/%s", s.Hosts.Play["rtmp"], s.Hub, s.Title)
 	urls[ORIGIN] = url
 	for _, profile := range s.Profiles {
@@ -132,6 +143,7 @@ func (s Stream) RtmpLiveUrls() (urls map[string]string, err error) {
 // --------------------------------------------------------------------------------
 
 func (s Stream) HlsLiveUrls() (urls map[string]string, err error) {
+	urls = make(map[string]string)
 	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8", s.Hosts.Play["hls"], s.Hub, s.Title)
 	for _, profile := range s.Profiles {
 		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8", s.Hosts.Play["hls"], s.Hub, s.Title, profile)
@@ -143,6 +155,7 @@ func (s Stream) HlsLiveUrls() (urls map[string]string, err error) {
 // --------------------------------------------------------------------------------
 
 func (s Stream) HlsPlaybackUrls(start, end int64) (urls map[string]string, err error) {
+	urls = make(map[string]string)
 	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8?start=%d&end=%d", s.Hosts.Play["hls"], s.Hub, s.Title, start, end)
 	for _, profile := range s.Profiles {
 		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8?start=%d&end=%d", s.Hosts.Play["hls"], s.Hub, s.Title, profile, start, end)

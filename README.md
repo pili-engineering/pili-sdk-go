@@ -2,7 +2,7 @@
 
 ## Features
 
-- [x] Stream operations (Create, Get, Update, Delete, Disable, Enable)
+- [x] Stream operations (Create, Get, Update, Disable, Enable, Refresh, Delete)
 - [x] Get Streams list
 - [x] Get Stream status
 - [x] Get Stream segments
@@ -21,8 +21,9 @@
 		- [Get a stream](#Get-a-stream)
 		- [List streams](#List-streams)
 	- [Stream](#Stream)
+		- [Refresh a stream](#Refresh-a-stream)
+		- [To JSON String](#To-JSON-String)
     	- [Update a stream](#Update-a-stream)
-		- [Delete a stream](#Delete-a-stream)
 		- [Disable a stream](#Disable-a-stream)
 		- [Enable a stream](#Enable-a-stream)
 		- [Get stream segments](#Get-stream-segments)
@@ -31,7 +32,7 @@
 		- [Generate RTMP live play URL](#Generate-RTMP-live-play-URL)
 		- [Generate HLS live play URL](#Generate-HLS-live-play-URL)
 		- [Generate HLS playback URL](#Generate-HLS-playback-URL)
-		- [To JSON String](#To-JSON-String)
+		- [Delete a stream](#Delete-a-stream)
 - [History](#History)
 
 ## Installaion
@@ -66,8 +67,8 @@ const (
 
 func main() {
 
-    var credentials = pili.Creds(ACCESS_KEY, SECRET_KEY)
-    var client = pili.NewClient(credentials, HUB)
+    credentials := pili.Creds(ACCESS_KEY, SECRET_KEY)
+    client := pili.NewClient(credentials, HUB)
 
     // ...
 }
@@ -76,18 +77,16 @@ func main() {
 #### Create a stream
 
 ```go
-options := pili.OptionalArguments {      // optional
-	Title           : "test1",           // optional, default is auto-generated
-	PublishKey      : "SomeSecretWords", // optional, a secret key for signing the `publishToken`, default is auto-generated
-	PublishSecurity : "static",          // optional, can be "dynamic" or "static", "dynamic" as default
+options := pili.OptionalArguments{ // optional
+    Title:           "stream_name",       // optional, auto-generated as default
+    PublishKey:      "some_secret_words", // optional, a secret key for signing the `publishToken`, default is auto-generated
+    PublishSecurity: "static",            // optional, can be "dynamic" or "static", "dynamic" as default
 }
-
-stream, err := client.CreateStream(&options)
+stream, err := client.CreateStream(options)
 if err != nil {
-	fmt.Println("error:", err)
+    fmt.Println("Error:", err)
 }
-
-fmt.Println(stream)
+fmt.Println("CreateStream:\n", stream)
 /*
 {
 	ID:z1.live.5544ee03fb16df2e330001c5
@@ -115,31 +114,31 @@ fmt.Println(stream)
 #### Get a stream
 
 ```go
-stream, err = client.GetStream(streamId)
+stream, err = client.GetStream(stream.Id)
 if err != nil {
-	fmt.Println("error:", err)
+    fmt.Println("Error:", err)
 }
-fmt.Println(stream)
+fmt.Println("GetStream:\n", stream)
 ```
 
 #### List streams
 
 ```go
-options := pili.OptionalArguments { // optional
-	Marker: "NextMarker",           // optional
-	Limit: 100,                     // optional
+options = pili.OptionalArguments{ // optional
+    Marker: "", // optional, returned by server response
+    Limit:  10, // optional
 }
-
-result, err := client.listStreams(&options)
+listResult, err := client.ListStreams(options)
 if err != nil {
-	fmt.Println("error:", err)
+    fmt.Println("Error:", err)
 }
-
-fmt.Println(result)
-// {Marker:NextMarker Items:[0x1042c180 0x1042c060]}
-
-for _, stream := range s.Items {
-	fmt.Println(stream)
+fmt.Println("ListStreams:\n", listResult)
+for _, stream := range listResult.Items {
+    streamRefreshed, err := stream.Refresh()
+    if err != nil {
+        fmt.Println("Error:", err)
+    }
+    fmt.Println("Stream Refreshed:\n", streamRefreshed)
 }
 /*
 &{
@@ -168,149 +167,23 @@ for _, stream := range s.Items {
 
 ### Stream
 
-#### Update a stream
+#### Refresh a stream
 
 ```go
-options := pili.OptionalArguments { // optional
-  PublishKey     : "publishKey",    // optional
-  PublishSecrity : "dynamic",       // optional
-}
-
-stream, err := stream.Update(&options)
+stream, err := stream.Refresh()
 if err != nil {
-	fmt.Println("error:", err)
+    fmt.Println("Error:", err)
 }
-
-fmt.Println(stream)
-```
-
-#### Delete a stream
-
-```go
-_, err := stream.Delete()
-if err != nil {
-	fmt.Println("error:", err)
-}
-```
-
-#### Disable a stream
-
-```go
-stream, err := stream.Disable()
-if err != nil {
-	fmt.Println("error:", err)
-}
-
-fmt.Println(stream)
-```
-
-#### Enable a stream
-
-```go
-stream, err := stream.Enable()
-if err != nil {
-	fmt.Println("error:", err)
-}
-
-fmt.Println(stream)
-```
-
-#### Get stream segments
-
-```go
-options := pili.OptionalArguments { // optional
-  Start : startTime,                // optional, in second, unix timestamp
-  End   : endTime,                  // optional, in second, unix timestamp
-}
-
-segments, err := stream.Segments(&options)
-if err != nil {
-	fmt.Println("error:", err)
-}
-
-fmt.Println(segments)
-// [{Start:1437283946 End:1437283999} {Start:1437284946 End:1437285946}]
-```
-
-#### Get stream status
-
-```go
-result, err := stream.Status()
-if err != nil {
-	fmt.Println("error:", err)
-}
-
-fmt.Println(result)
-// {Addr:106.187.43.211:51393 Status:disconnected}
-```
-
-#### Generate RTMP publish URL
-
-```go
-url, _ := stream.RtmpPublishUrl()
-fmt.Println(url)
-// "rtmp://customized.example.com/hub/title?key=publishKey"
-```
-
-#### Generate RTMP live play URLs
-
-```go
-urls, err: = stream.RtmpLiveUrls()
-if err != nil {
-	fmt.Println("error:", err)
-}
-
-for k, v := range urls {
-	fmt.Printf("%s:%s\n", k, v)
-}
-
-fmt.Println(urls["ORIGIN"])
-// "rtmp://customized.example.com/hub/title"
-```
-
-#### Generate HLS live play URLs
-
-```go
-urls, err: = stream.HlsLiveUrls()
-if err != nil {
-	fmt.Println("error:", err)
-}
-
-for k, v := range urls {
-	fmt.Printf("%s:%s\n", k, v)
-}
-
-fmt.Println(urls["ORIGIN"])
-// "http://customized.example.com/hub/title.m3u8"
-```
-
-#### Generate HLS playback URLs
-
-```go
-// start: required, in second, unix timestamp
-// end  : required, in second, unix timestamp
-
-urls, err: = stream.HlsPlaybackUrls(start, end)
-if err != nil {
-	fmt.Println("error:", err)
-}
-
-for k, v := range urls {
-	fmt.Printf("%s:%s\n", k, v)
-}
-
-fmt.Println(urls["ORIGIN"])
-// "http://customized.example.com/hub/title.m3u8?start=1437283946&end=1437285946"
+fmt.Println("Stream Refreshed:\n", stream)
 ```
 
 #### To JSON String
 ```go
-streamJson, err := stream.ToJSONString()
+streamJson, err := stream.ToJsonString()
 if err != nil {
-	fmt.Println("error:", err)
+    fmt.Println("Error:", err)
 }
-
-fmt.Println(streamJson)
+fmt.Println("Stream ToJsonString:\n", streamJson)
 /*
 {
     "id":"z1.live.5544ee03fb16df2e330001c5",
@@ -333,6 +206,132 @@ fmt.Println(streamJson)
     }
 }
 */
+```
+
+#### Update a stream
+
+```go
+options = pili.OptionalArguments{  // optional
+    PublishKey:      "publishKey", // optional
+    PublishSecurity: "dynamic",    // optional
+}
+stream, err = stream.Update(options)
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Updated:\n", stream)
+```
+
+#### Disable a stream
+
+```go
+stream, err = stream.Disable()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Disabled:\n", stream)
+```
+
+#### Enable a stream
+
+```go
+stream, err = stream.Enable()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Enabled:\n", stream)
+```
+
+#### Get stream segments
+
+```go
+options = pili.OptionalArguments{ // optional
+    Start: 1439121809,            // optional, in second, unix timestamp
+    End:   1439125409,            // optional, in second, unix timestamp
+}
+segments, err := stream.Segments(options)
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Segments:\n", segments)
+// [{Start:1437283946 End:1437283999} {Start:1437284946 End:1437285946}]
+```
+
+#### Get stream status
+
+```go
+streamStatus, err := stream.Status()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Status:\n", streamStatus)
+// {Addr:106.187.43.211:51393 Status:disconnected}
+```
+
+#### Generate RTMP publish URL
+
+```go
+url := stream.RtmpPublishUrl()
+fmt.Println("Stream RtmpPublishUrl:\n", url)
+// "rtmp://customized.example.com/hub/title?key=publishKey"
+```
+
+#### Generate RTMP live play URLs
+
+```go
+urls, err := stream.RtmpLiveUrls()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("RtmpLiveUrls:")
+for k, v := range urls {
+    fmt.Printf("%s:%s\n", k, v)
+}
+fmt.Println("Original RtmpLiveUrl:\n", urls["ORIGIN"])
+// "rtmp://customized.example.com/hub/title"
+```
+
+#### Generate HLS live play URLs
+
+```go
+urls, err = stream.HlsLiveUrls()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("HlsLiveUrls:")
+for k, v := range urls {
+    fmt.Printf("%s:%s\n", k, v)
+}
+fmt.Println("Original HlsLiveUrl:\n", urls["ORIGIN"])
+// "http://customized.example.com/hub/title.m3u8"
+```
+
+#### Generate HLS playback URLs
+
+```go
+start := 1439121809 // required, in second, unix timestamp
+end   := 1439125409 // required, in second, unix timestamp
+urls, err = stream.HlsPlaybackUrls(int64(start), int64(end))
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("HlsPlaybackUrls:")
+for k, v := range urls {
+    fmt.Printf("%s:%s\n", k, v)
+}
+fmt.Println("Original HlsPlaybackUrl:\n", urls["ORIGIN"])
+// "http://customized.example.com/hub/title.m3u8?start=1439121809&end=1439125409"
+```
+
+#### Delete a stream
+
+```go
+deleteResult, err := stream.Delete()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Deleted:\n", deleteResult)
+// <nil>
 ```
 
 ## History
