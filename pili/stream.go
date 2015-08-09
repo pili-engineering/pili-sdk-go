@@ -20,7 +20,7 @@ func (s Stream) Refresh() (stream Stream, err error) {
 	return
 }
 
-func (s Stream) ToJsonString() (jsonBlob string, err error) {
+func (s Stream) ToJSONString() (jsonBlob string, err error) {
 	jsonBytes, err := json.Marshal(s)
 	jsonBlob = string(jsonBytes)
 	return

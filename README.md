@@ -165,11 +165,11 @@ for _, stream := range listResult.Items {
 
 #### To JSON String
 ```go
-streamJson, err := stream.ToJsonString()
+streamJson, err := stream.ToJSONString()
 if err != nil {
     fmt.Println("Error:", err)
 }
-fmt.Println("Stream ToJsonString:\n", streamJson)
+fmt.Println("Stream ToJSONString:\n", streamJson)
 /*
 {
     "id":"z1.live.5544ee03fb16df2e330001c5",
