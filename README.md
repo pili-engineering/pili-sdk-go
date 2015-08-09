@@ -21,9 +21,9 @@
 		- [Get a stream](#Get-a-stream)
 		- [List streams](#List-streams)
 	- [Stream](#Stream)
-		- [Refresh a stream](#Refresh-a-stream)
 		- [To JSON String](#To-JSON-String)
     	- [Update a stream](#Update-a-stream)
+		- [Refresh a stream](#Refresh-a-stream)
 		- [Disable a stream](#Disable-a-stream)
 		- [Enable a stream](#Enable-a-stream)
 		- [Get stream segments](#Get-stream-segments)
@@ -77,7 +77,7 @@ func main() {
 #### Create a stream
 
 ```go
-options := pili.OptionalArguments{ // optional
+options := pili.OptionalArguments{        // optional
     Title:           "stream_name",       // optional, auto-generated as default
     PublishKey:      "some_secret_words", // optional, a secret key for signing the `publishToken`, default is auto-generated
     PublishSecurity: "static",            // optional, can be "dynamic" or "static", "dynamic" as default
@@ -125,8 +125,8 @@ fmt.Println("GetStream:\n", stream)
 
 ```go
 options = pili.OptionalArguments{ // optional
-    Marker: "", // optional, returned by server response
-    Limit:  10, // optional
+    Marker: "",                   // optional, returned by server response
+    Limit:  10,                   // optional
 }
 listResult, err := client.ListStreams(options)
 if err != nil {
@@ -166,16 +166,6 @@ for _, stream := range listResult.Items {
 ```
 
 ### Stream
-
-#### Refresh a stream
-
-```go
-stream, err := stream.Refresh()
-if err != nil {
-    fmt.Println("Error:", err)
-}
-fmt.Println("Stream Refreshed:\n", stream)
-```
 
 #### To JSON String
 ```go
@@ -220,6 +210,16 @@ if err != nil {
     fmt.Println("Error:", err)
 }
 fmt.Println("Stream Updated:\n", stream)
+```
+
+#### Refresh a stream
+
+```go
+stream, err := stream.Refresh()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Refreshed:\n", stream)
 ```
 
 #### Disable a stream
