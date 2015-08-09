@@ -2,21 +2,23 @@
 
 ## Features
 
-- [x] client.CreateStream(options)
-- [x] client.GetStream(stream.Id)
-- [x] client.ListStreams(options)
-- [x] stream.ToJSONString()
-- [x] stream.Update(options)
-- [x] stream.Refresh()
-- [x] stream.Disable()
-- [x] stream.Enable()
-- [x] stream.Segments(options)
-- [x] stream.Status()
-- [x] stream.RtmpPublishUrl()
-- [x] stream.RtmpLiveUrls()
-- [x] stream.HlsLiveUrls()
-- [x] stream.HlsPlaybackUrls(int64(start), int64(end))
-- [x] stream.Delete()
+- Stream Create,Get,List
+    - [x] client.CreateStream(options)
+    - [x] client.GetStream(stream.Id)
+    - [x] client.ListStreams(options)
+- Stream operations
+    - [x] stream.ToJSONString()
+    - [x] stream.Update(options)
+    - [x] stream.Refresh()
+    - [x] stream.Disable()
+    - [x] stream.Enable()
+    - [x] stream.Segments(options)
+    - [x] stream.Status()
+    - [x] stream.RtmpPublishUrl()
+    - [x] stream.RtmpLiveUrls()
+    - [x] stream.HlsLiveUrls()
+    - [x] stream.HlsPlaybackUrls(int64(start), int64(end))
+    - [x] stream.Delete()
 
 ## Content
 
