@@ -150,6 +150,20 @@ func main() {
 	}
 	fmt.Println("Original HlsPlaybackUrl:\n", urls[pili.ORIGIN])
 
+	// Save Stream as
+	name := "fileName" // required, string
+	format := "mp4"    // required, string
+	start = 1439121809 // required, int64, in second, unix timestamp
+	end = 1439125409   // required, int64, in second, unix timestamp
+	options = pili.OptionalArguments{
+		NotifyUrl: "http://remote_callback_url",
+	} // optional
+	saveAsRes, err := stream.SaveAs(name, format, int64(start), int64(end), options)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Stream save as:\n", saveAsRes)
+
 	// Delete a stream
 	deleteResult, err := stream.Delete()
 	if err != nil {

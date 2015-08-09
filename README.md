@@ -3,21 +3,22 @@
 ## Features
 
 - Stream Create,Get,List
-    - [x] client.CreateStream(options)
+    - [x] client.CreateStream(options={Title,PublishKey,PublishSecurity})
     - [x] client.GetStream(stream.Id)
-    - [x] client.ListStreams(options)
+    - [x] client.ListStreams(options={Marker,Limit})
 - Stream operations else
     - [x] stream.ToJSONString()
-    - [x] stream.Update(options)
+    - [x] stream.Status()
+    - [x] stream.Update(options={PublishKey,PublishSecurity})
     - [x] stream.Refresh()
     - [x] stream.Disable()
     - [x] stream.Enable()
-    - [x] stream.Segments(options)
-    - [x] stream.Status()
     - [x] stream.RtmpPublishUrl()
     - [x] stream.RtmpLiveUrls()
     - [x] stream.HlsLiveUrls()
-    - [x] stream.HlsPlaybackUrls(int64(start), int64(end))
+    - [x] stream.HlsPlaybackUrls(start, end int64)
+    - [x] stream.Segments(options={Start,End})
+    - [x] stream.SaveAs(name,format string, start,end int64, options={notifyUrl})
     - [x] stream.Delete()
 
 ## Contents
@@ -329,6 +330,23 @@ fmt.Println("Original HlsPlaybackUrl:\n", urls[pili.ORIGIN])
 // "http://customized.example.com/hub/title.m3u8?start=1439121809&end=1439125409"
 ```
 
+#### Save Stream as
+
+```go
+name := "fileName" // required, string
+format := "mp4"    // required, string
+start = 1439121809 // required, int64, in second, unix timestamp
+end = 1439125409   // required, int64, in second, unix timestamp
+options = pili.OptionalArguments{
+    NotifyUrl: "http://remote_callback_url",
+} // optional
+saveAsRes, err := stream.SaveAs(name, format, int64(start), int64(end), options)
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream save as:\n", saveAsRes)
+```
+
 #### Delete a stream
 
 ```go
@@ -342,6 +360,10 @@ fmt.Println("Stream Deleted:\n", deleteResult)
 
 ## History
 
+- 1.3.0
+    - Add Stream recording
+        - [x] stream.SaveAs(name,format,start,end,options)
+
 - 1.2.0
     - Add Stream operations
     	- [x] stream.ToJSONString()
@@ -354,7 +376,7 @@ fmt.Println("Stream Deleted:\n", deleteResult)
     	- [x] stream.RtmpPublishUrl()
     	- [x] stream.RtmpLiveUrls()
     	- [x] stream.HlsLiveUrls()
-    	- [x] stream.HlsPlaybackUrls(int64(start), int64(end))
+    	- [x] stream.HlsPlaybackUrls(start,end)
     	- [x] stream.Delete()
     - Update Client functions
     	- [x] client.CreateStream(options)
