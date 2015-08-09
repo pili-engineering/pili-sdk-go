@@ -80,6 +80,16 @@ func (s Stream) Segments(args OptionalArguments) (ret StreamSegmentList, err err
 	return
 }
 
+func (s Stream) SaveAs(name, format string, start, end int64, args OptionalArguments) (ret StreamSaveAsResponse, err error) {
+	data := map[string]interface{}{"name": name, "format": format, "start": start, "end": end}
+	if args.NotifyUrl != "" {
+		data["notifyUrl"] = args.NotifyUrl
+	}
+	url := fmt.Sprintf("%s/streams/%s/saveas", API_BASE_URL, s.Id)
+	err = s.conn.PostCall(&ret, url, data)
+	return
+}
+
 // Publish URL
 // -------------------------------------------------------------------------------
 func (s Stream) RtmpPublishUrl() (url string) {

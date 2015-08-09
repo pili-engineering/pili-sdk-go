@@ -40,6 +40,12 @@ type StreamStatus struct {
 	Status string `json:"status"`
 }
 
+type StreamSaveAsResponse struct {
+	Url          string `json:"url"`
+	TargetUrl    string `json:"targetUrl"`
+	PersistentId string `json:"persistentId"`
+}
+
 type OptionalArguments struct {
 	Title           string
 	PublishKey      string
@@ -49,4 +55,5 @@ type OptionalArguments struct {
 	Limit           uint
 	Start           int64
 	End             int64
+	NotifyUrl       string
 }
