@@ -333,6 +333,20 @@ fmt.Println("Stream Deleted:\n", deleteResult)
 ## History
 
 - 1.2.0
-    - Update Stream object
-    - Add new Stream functions
+    - Add Stream operations
+    	- [x] stream.ToJSONString()
+    	- [x] stream.Update(options)
+    	- [x] stream.Refresh()
+    	- [x] stream.Disable()
+    	- [x] stream.Enable()
+    	- [x] stream.Segments(options)
+    	- [x] stream.Status()
+    	- [x] stream.RtmpPublishUrl()
+    	- [x] stream.RtmpLiveUrls()
+    	- [x] stream.HlsLiveUrls()
+    	- [x] stream.HlsPlaybackUrls(int64(start), int64(end))
+    	- [x] stream.Delete()
     - Update Client functions
+    	- [x] client.CreateStream(options)
+    	- [x] client.GetStream(stream.Id)
+    	- [x] client.ListStreams(options)
