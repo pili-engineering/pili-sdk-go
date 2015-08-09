@@ -55,11 +55,11 @@ func main() {
 	}
 
 	// To JSON String
-	streamJson, err := stream.ToJsonString()
+	streamJson, err := stream.ToJSONString()
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	fmt.Println("Stream ToJsonString:\n", streamJson)
+	fmt.Println("Stream ToJSONString:\n", streamJson)
 
 	// Update a stream
 	options = pili.OptionalArguments{ // optional
