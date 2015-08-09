@@ -134,11 +134,10 @@ if err != nil {
 }
 fmt.Println("ListStreams:\n", listResult)
 for _, stream := range listResult.Items {
-    streamRefreshed, err := stream.Refresh()
     if err != nil {
         fmt.Println("Error:", err)
     }
-    fmt.Println("Stream Refreshed:\n", streamRefreshed)
+    fmt.Println("Stream:\n", stream)
 }
 /*
 &{
