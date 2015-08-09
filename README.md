@@ -79,7 +79,7 @@ func main() {
 ```go
 options := pili.OptionalArguments{        // optional
     Title:           "stream_name",       // optional, auto-generated as default
-    PublishKey:      "some_secret_words", // optional, a secret key for signing the `publishToken`, default is auto-generated
+    PublishKey:      "some_secret_words", // optional, auto-generated as default
     PublishSecurity: "static",            // optional, can be "dynamic" or "static", "dynamic" as default
 }
 stream, err := client.CreateStream(options)
