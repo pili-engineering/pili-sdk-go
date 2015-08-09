@@ -1,9 +1,45 @@
 # Pili server-side library for Golang
 
-## Installation
+## Features
 
-```bash
-$ go get github.com/pili-io/pili-sdk-go/pili
+- [x] Stream operations (Create, Get, Update, Disable, Enable, Refresh, Delete)
+- [x] Get Streams list
+- [x] Get Stream status
+- [x] Get Stream segments
+- [x] Generate RTMP publish URL
+- [x] Generate RTMP and HLS live play URL
+- [x] Generate HLS playback URL
+
+## Content
+
+- [Installation](#Installation)
+- [Usage](#Usage)
+	- [Configuration](#Configuration)
+	- [Client](#Client)
+		- [Create a Pili client](#Create-a-Pili-client)
+		- [Create a stream](#Create-a-stream)
+		- [Get a stream](#Get-a-stream)
+		- [List streams](#List-streams)
+	- [Stream](#Stream)
+		- [Refresh a stream](#Refresh-a-stream)
+		- [To JSON String](#To-JSON-String)
+    	- [Update a stream](#Update-a-stream)
+		- [Disable a stream](#Disable-a-stream)
+		- [Enable a stream](#Enable-a-stream)
+		- [Get stream segments](#Get-stream-segments)
+		- [Get stream status](#Get-stream-status)
+		- [Generate RTMP publish URL](#Generate-RTMP-publish-URL)
+		- [Generate RTMP live play URL](#Generate-RTMP-live-play-URL)
+		- [Generate HLS live play URL](#Generate-HLS-live-play-URL)
+		- [Generate HLS playback URL](#Generate-HLS-playback-URL)
+		- [Delete a stream](#Delete-a-stream)
+- [History](#History)
+
+## Installaion
+
+```
+// install latest version
+$ go get github.com/pili-engineering/pili-sdk-go/pili
 ```
 
 ## Usage
@@ -11,173 +47,296 @@ $ go get github.com/pili-io/pili-sdk-go/pili
 ### Configuration
 
 ```go
-
 import (
-    "github.com/pili-io/pili-sdk-go/pili"
+    "github.com/pili-engineering/pili-sdk-go/pili"
     // ...
 )
 
 const (
-	// Replace with your keys here
-	ACCESS_KEY = "QiniuAccessKey"
-	SECRET_KEY = "QiniuSecretKey"
-
-	// Replace with your hub name
-	HUB = "hubName"
-
-	// Replace with your customized domains
-	RTMP_PUBLISH_HOST = "xxx.pub.z1.pili.qiniup.com"
-	RTMP_PLAY_HOST    = "xxx.live1.z1.pili.qiniucdn.com"
-	HLS_PLAY_HOST     = "xxx.hls1.z1.pili.qiniucdn.com"
+	ACCESS_KEY = "Qiniu_AccessKey"
+	SECRET_KEY = "Qiniu_SecretKey"
+	HUB        = "Pili_HubName"
 )
 ```
 
+### Client
 
-### Instantiate an Pili client
+#### Create a Pili client
 
 ```go
 
 func main() {
 
-    var creds = pili.Creds(ACCESS_KEY, SECRET_KEY)
-    var client = pili.NewClient(creds)
+    credentials := pili.Creds(ACCESS_KEY, SECRET_KEY)
+    client := pili.NewClient(credentials, HUB)
 
     // ...
 }
 ```
 
-
-### Create a new stream
+#### Create a stream
 
 ```go
-hub             := HUB // required, hub must be an exists one
-title           := ""  // optional, default is auto-generated
-publishKey      := ""  // optional, a secret key for signing the <publishToken>, default is auto-generated
-publishSecurity := ""  // optional, can be "dynamic" or "static", default is "dynamic"
-
-stream, err := client.CreateStream(hub, title, publishKey, publishSecurity)
-if err != nil {
-    panic(err)
+options := pili.OptionalArguments{ // optional
+    Title:           "stream_name",       // optional, auto-generated as default
+    PublishKey:      "some_secret_words", // optional, a secret key for signing the `publishToken`, default is auto-generated
+    PublishSecurity: "static",            // optional, can be "dynamic" or "static", "dynamic" as default
 }
-
-fmt.Printf("Result:%+v\n", stream)
+stream, err := client.CreateStream(options)
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("CreateStream:\n", stream)
+/*
+{
+	ID:z1.live.5544ee03fb16df2e330001c5
+	CreatedAt:2015-05-02 23:32:19.608 +0800 +0800
+	UpdatedAt:2015-05-02 23:32:19.608 +0800 +0800
+	Title:5544ee03fb16df2e330001c5
+	Hub:live
+	Disabled:false
+	PublishKey:2769c4753656d244
+	PublishSecurity:dynamic
+	Profiles:[720p 480p 360p 240p]
+	Hosts:{
+		Publish:map[
+			rtmp:5icsm3.pub.z1.pili.qiniup.com
+		]
+		Play:map[
+			hls:5icsm3.hls1.z1.pili.qiniucdn.com
+			rtmp:5icsm3.live1.z1.pili.qiniucdn.com
+		]
+	}
+}
+*/
 ```
 
-
-### Get stream
+#### Get a stream
 
 ```go
 stream, err = client.GetStream(stream.Id)
 if err != nil {
-    panic(err)
+    fmt.Println("Error:", err)
 }
-fmt.Printf("Result:%+v\n", stream)
+fmt.Println("GetStream:\n", stream)
 ```
 
-### Generate a RTMP publish URL
+#### List streams
 
 ```go
-var nonce int64
-rtmpPublishUrl := stream.RtmpPublishUrl(RTMP_PUBLISH_HOST, nonce)
-fmt.Printf("RTMP Publish URL is:\n%+v\n\n", rtmpPublishUrl)
-```
-
-### Generate RTMP live play URL
-
-```go
-profile := ""
-// or
-profile := "480p" // optional, all profiles should be defined first.
-
-rtmpLiveUrl := stream.RtmpLiveUrl(RTMP_PLAY_HOST, profile)
-
-fmt.Printf("RTMP Play URL:\n%+v\n\n", rtmpLiveUrl)
-```
-
-### Generate HLS live play URL
-
-```go
-hlsLiveUrl := stream.HlsLiveUrl(HLS_PLAY_HOST, profile)
-fmt.Printf("HLS Play URL:\n%+v\n\n", hlsLiveUrl)
-```
-
-
-### Generate HLS playback URL
-
-```go
-startTime := time.Now().Unix() - 3600 // required
-endTime := time.Now().Unix()          // required
-
-hlsPlaybackUrl := stream.HlsPlaybackUrl(HLS_PLAY_HOST, profile, startTime, endTime)
-
-fmt.Printf("HLS Playback URL:\n%+v\n\n", hlsPlaybackUrl)
-```
-
-
-### Get status
-
-```go
-streamStatus, err := client.GetStreamStatus(stream.Id)
+options = pili.OptionalArguments{ // optional
+    Marker: "", // optional, returned by server response
+    Limit:  10, // optional
+}
+listResult, err := client.ListStreams(options)
 if err != nil {
-    panic(err)
+    fmt.Println("Error:", err)
 }
-fmt.Printf("Result:%+v\n", streamStatus)
+fmt.Println("ListStreams:\n", listResult)
+for _, stream := range listResult.Items {
+    streamRefreshed, err := stream.Refresh()
+    if err != nil {
+        fmt.Println("Error:", err)
+    }
+    fmt.Println("Stream Refreshed:\n", streamRefreshed)
+}
+/*
+&{
+	ID:z1.live.5544ee03fb16df2e330001c5
+	CreatedAt:2015-05-02 23:32:19.608 +0800 +0800
+	UpdatedAt:2015-05-02 23:32:19.608 +0800 +0800
+	Title:5544ee03fb16df2e330001c5
+	Hub:live
+	Disabled:false
+	PublishKey:2769c4753656d244
+	PublishSecurity:dynamic
+	Profiles:[720p 480p 360p 240p]
+	Hosts:{
+		Publish:map[
+			rtmp:5icsm3.pub.z1.pili.qiniup.com
+		]
+		Play:map[
+			hls:5icsm3.hls1.z1.pili.qiniucdn.com
+			rtmp:5icsm3.live1.z1.pili.qiniucdn.com
+		]
+	}
+}
+...
+*/
 ```
 
+### Stream
 
-### List streams
+#### Refresh a stream
 
 ```go
-hub    := HUB // required
-marker := ""  // optional
-limit  := 0   // optional
-
-result, err := client.ListStreams(hub, marker, int64(limit))
+stream, err := stream.Refresh()
 if err != nil {
-    panic(err)
+    fmt.Println("Error:", err)
 }
-
-fmt.Printf("Result:%+v\n", result)
+fmt.Println("Stream Refreshed:\n", stream)
 ```
 
+#### To JSON String
+```go
+streamJson, err := stream.ToJsonString()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream ToJsonString:\n", streamJson)
+/*
+{
+    "id":"z1.live.5544ee03fb16df2e330001c5",
+    "createdAt":"2015-05-02T23:32:19.608+08:00",
+    "updatedAt":"2015-05-02T23:32:19.608+08:00",
+    "title":"5544ee03fb16df2e330001c5",
+    "hub":"live",
+    "disabled":false,
+    "publishKey":"2769c4753656d244",
+    "publishSecurity":"dynamic",
+    "profiles": ["720p", "480p", "360p", "240p"],
+    "hosts":{
+        "publish":{
+            "rtmp":"5icsm3.pub.z1.pili.qiniup.com"
+        },
+        "play":{
+            "hls":"5icsm3.hls1.z1.pili.qiniucdn.com",
+            "rtmp":"5icsm3.live1.z1.pili.qiniucdn.com"
+        }
+    }
+}
+*/
+```
 
-### Get recording segments
+#### Update a stream
 
 ```go
-var startTime int64 // optional
-var endTime int64   // optional
-
-segments, err := client.GetStreamSegments(stream.Id, startTime, endTime)
-if err != nil {
-    panic(err)
+options = pili.OptionalArguments{  // optional
+    PublishKey:      "publishKey", // optional
+    PublishSecurity: "dynamic",    // optional
 }
-
-fmt.Printf("Result:%+v\n", segments)
+stream, err = stream.Update(options)
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Updated:\n", stream)
 ```
 
-
-### Update an exist stream
+#### Disable a stream
 
 ```go
-newPublishKey      := "new_secret_words"
-newPublishSecurity := "dynamic"
-disabled           := true
-
-stream, err = client.SetStream(stream.Id, newPublishKey, newPublishSecurity, disabled)
+stream, err = stream.Disable()
 if err != nil {
-    panic(err)
+    fmt.Println("Error:", err)
 }
-
-fmt.Printf("Result:%+v\n", stream)
+fmt.Println("Stream Disabled:\n", stream)
 ```
 
-
-### Delete stream
+#### Enable a stream
 
 ```go
-del, err := client.DelStream(stream.Id)
+stream, err = stream.Enable()
 if err != nil {
-    panic(err)
+    fmt.Println("Error:", err)
 }
-fmt.Printf("Result:%+v\n", del)
+fmt.Println("Stream Enabled:\n", stream)
 ```
+
+#### Get stream segments
+
+```go
+options = pili.OptionalArguments{ // optional
+    Start: 1439121809,            // optional, in second, unix timestamp
+    End:   1439125409,            // optional, in second, unix timestamp
+}
+segments, err := stream.Segments(options)
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Segments:\n", segments)
+// [{Start:1437283946 End:1437283999} {Start:1437284946 End:1437285946}]
+```
+
+#### Get stream status
+
+```go
+streamStatus, err := stream.Status()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Status:\n", streamStatus)
+// {Addr:106.187.43.211:51393 Status:disconnected}
+```
+
+#### Generate RTMP publish URL
+
+```go
+url := stream.RtmpPublishUrl()
+fmt.Println("Stream RtmpPublishUrl:\n", url)
+// "rtmp://customized.example.com/hub/title?key=publishKey"
+```
+
+#### Generate RTMP live play URLs
+
+```go
+urls, err := stream.RtmpLiveUrls()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("RtmpLiveUrls:")
+for k, v := range urls {
+    fmt.Printf("%s:%s\n", k, v)
+}
+fmt.Println("Original RtmpLiveUrl:\n", urls["ORIGIN"])
+// "rtmp://customized.example.com/hub/title"
+```
+
+#### Generate HLS live play URLs
+
+```go
+urls, err = stream.HlsLiveUrls()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("HlsLiveUrls:")
+for k, v := range urls {
+    fmt.Printf("%s:%s\n", k, v)
+}
+fmt.Println("Original HlsLiveUrl:\n", urls["ORIGIN"])
+// "http://customized.example.com/hub/title.m3u8"
+```
+
+#### Generate HLS playback URLs
+
+```go
+start := 1439121809 // required, in second, unix timestamp
+end   := 1439125409 // required, in second, unix timestamp
+urls, err = stream.HlsPlaybackUrls(int64(start), int64(end))
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("HlsPlaybackUrls:")
+for k, v := range urls {
+    fmt.Printf("%s:%s\n", k, v)
+}
+fmt.Println("Original HlsPlaybackUrl:\n", urls["ORIGIN"])
+// "http://customized.example.com/hub/title.m3u8?start=1439121809&end=1439125409"
+```
+
+#### Delete a stream
+
+```go
+deleteResult, err := stream.Delete()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Deleted:\n", deleteResult)
+// <nil>
+```
+
+## History
+
+- 1.2.0
+    - Update Stream object
+    - Add new Stream functions
+    - Update Client functions

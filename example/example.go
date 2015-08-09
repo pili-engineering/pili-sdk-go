@@ -3,107 +3,154 @@ package main
 import (
 	"../pili" // or "github.com/pili-io/pili-sdk-go/pili"
 	"fmt"
-	"time"
 )
 
 const (
-	// Replace with your customized domains
-	RTMP_PUBLISH_HOST = "xxx.pub.z1.pili.qiniup.com"
-	RTMP_PLAY_HOST    = "xxx.live1.z1.pili.qiniucdn.com"
-	HLS_PLAY_HOST     = "xxx.hls1.z1.pili.qiniucdn.com"
 
 	// Replace with your keys here
-	ACCESS_KEY = "QiniuAccessKey"
-	SECRET_KEY = "QiniuSecretKey"
+	ACCESS_KEY = "Qiniu_AccessKey"
+	SECRET_KEY = "Qiniu_SecretKey"
 
 	// Replace with your hub name
-	HUB = "hubName"
+	HUB = "Pili_Hub"
 )
 
 func main() {
 
 	// Instantiate an Pili client
-	creds := pili.Creds(ACCESS_KEY, SECRET_KEY)
-	client := pili.NewClient(creds)
+	credentials := pili.Creds(ACCESS_KEY, SECRET_KEY)
+	client := pili.NewClient(credentials, HUB)
 
 	// Create a new stream
-	hub := HUB            // required, hub must be an exists one
-	title := ""           // optional, default is auto-generated
-	publishKey := ""      // optional, a secret key for signing the <publishToken>, default is auto-generated
-	publishSecurity := "" // optional, can be "dynamic" or "static", default is "dynamic"
-
-	stream, err := client.CreateStream(hub, title, publishKey, publishSecurity)
-	if err != nil {
-		panic(err)
+	options := pili.OptionalArguments{ // optional
+		Title:           "stream_name",       // optional, auto-generated as default
+		PublishKey:      "some_secret_words", // optional, a secret key for signing the `publishToken`, default is auto-generated
+		PublishSecurity: "static",            // optional, can be "dynamic" or "static", "dynamic" as default
 	}
-	fmt.Printf("Result:%+v\n", stream)
+	stream, err := client.CreateStream(options)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("CreateStream:\n", stream)
 
-	// Get an exist stream
+	// Get a stream
 	stream, err = client.GetStream(stream.Id)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error:", err)
 	}
-	fmt.Printf("Result:%+v\n", stream)
-
-	// Get RTMP publish URL
-	var nonce int64
-	rtmpPublishUrl := stream.RtmpPublishUrl(RTMP_PUBLISH_HOST, nonce)
-	fmt.Printf("RTMP Publish URL is:\n%+v\n\n", rtmpPublishUrl)
-
-	// Get RTMP and HLS play URL
-	profile := "" // optional, like '720p', '480p', '360p', '240p'. All profiles should be defined first.
-	rtmpLiveUrl := stream.RtmpLiveUrl(RTMP_PLAY_HOST, profile)
-	fmt.Printf("RTMP Play URL:\n%+v\n\n", rtmpLiveUrl)
-
-	hlsLiveUrl := stream.HlsLiveUrl(HLS_PLAY_HOST, profile)
-	fmt.Printf("HLS Play URL:\n%+v\n\n", hlsLiveUrl)
-
-	startTime := time.Now().Unix() - 3600 // required
-	endTime := time.Now().Unix()          // required
-	hlsPlaybackUrl := stream.HlsPlaybackUrl(HLS_PLAY_HOST, profile, startTime, endTime)
-	fmt.Printf("HLS Playback URL:\n%+v\n\n", hlsPlaybackUrl)
-
-	// Get status
-	streamStatus, err := client.GetStreamStatus(stream.Id)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Result:%+v\n", streamStatus)
+	fmt.Println("GetStream:\n", stream)
 
 	// List streams
-	hub = HUB       // required
-	marker := ""    // optional
-	var limit int64 // optional
-	result1, err := client.ListStreams(hub, marker, limit)
-	if err != nil {
-		panic(err)
+	options = pili.OptionalArguments{ // optional
+		Marker: "", // optional, returned by server response
+		Limit:  10, // optional
 	}
-	fmt.Printf("Result:%+v\n", result1)
-
-	// Get recording segments from an exist stream
-	// var startTime int64 // optional
-	// var endTime int64   // optional
-	result2, err := client.GetStreamSegments(stream.Id, startTime, endTime)
+	listResult, err := client.ListStreams(options)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error:", err)
 	}
-	fmt.Printf("Result:%+v\n", result2)
+	fmt.Println("ListStreams:\n", listResult)
+	for _, stream := range listResult.Items {
+		streamRefreshed, err := stream.Refresh()
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+		fmt.Println("Stream Refreshed:\n", streamRefreshed)
+	}
 
-	// Update an exist stream
-	newPublishKey := "new_secret_words"
-	newPublishSecurity := "dynamic"
-	disabled := true
-	stream, err = client.SetStream(stream.Id, newPublishKey, newPublishSecurity, disabled)
+	// To JSON String
+	streamJson, err := stream.ToJsonString()
 	if err != nil {
-		panic(err)
+		fmt.Println("Error:", err)
 	}
-	fmt.Printf("Result:%+v\n", stream)
+	fmt.Println("Stream ToJsonString:\n", streamJson)
 
-	// Delete
-	result3, err := client.DelStream(stream.Id)
+	// Update a stream
+	options = pili.OptionalArguments{ // optional
+		PublishKey:      "publishKey", // optional
+		PublishSecurity: "dynamic",    // optional
+	}
+	stream, err = stream.Update(options)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error:", err)
 	}
-	fmt.Printf("Result:%+v\n", result3)
+	fmt.Println("Stream Updated:\n", stream)
 
+	// Disable a stream
+	stream, err = stream.Disable()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Stream Disabled:\n", stream)
+
+	// Enable a stream
+	stream, err = stream.Enable()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Stream Enabled:\n", stream)
+
+	// Get stream segments
+	options = pili.OptionalArguments{ // optional
+		Start: 1439121809, // optional, in second, unix timestamp
+		End:   1439125409, // optional, in second, unix timestamp
+	}
+	segments, err := stream.Segments(options)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Segments:\n", segments)
+
+	// Get stream status
+	streamStatus, err := stream.Status()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Stream Status:\n", streamStatus)
+
+	// Generate RTMP publish URL
+	url := stream.RtmpPublishUrl()
+	fmt.Println("Stream RtmpPublishUrl:\n", url)
+
+	// Generate RTMP live play URLs
+	urls, err := stream.RtmpLiveUrls()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("RtmpLiveUrls:")
+	for k, v := range urls {
+		fmt.Printf("%s:%s\n", k, v)
+	}
+	fmt.Println("Original RtmpLiveUrl:\n", urls["ORIGIN"])
+
+	// Generate HLS live play URLs
+	urls, err = stream.HlsLiveUrls()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("HlsLiveUrls:")
+	for k, v := range urls {
+		fmt.Printf("%s:%s\n", k, v)
+	}
+	fmt.Println("Original HlsLiveUrl:\n", urls["ORIGIN"])
+
+	// Generate HLS playback URLs
+	start := 1439121809
+	end := 1439125409
+	urls, err = stream.HlsPlaybackUrls(int64(start), int64(end))
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("HlsPlaybackUrls:")
+	for k, v := range urls {
+		fmt.Printf("%s:%s\n", k, v)
+	}
+	fmt.Println("Original HlsPlaybackUrl:\n", urls["ORIGIN"])
+
+	// Delete a stream
+	deleteResult, err := stream.Delete()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Stream Deleted:\n", deleteResult)
 }
