@@ -42,13 +42,13 @@ func (s Stream) Disable() (stream Stream, err error) {
 	return
 }
 
-func (s Stream) Update(args OptionalArguments) (stream Stream, err error) {
+func (s Stream) Update() (stream Stream, err error) {
 	data := map[string]interface{}{}
-	if args.PublishKey != "" {
-		data["publishKey"] = args.PublishKey
+	if s.PublishKey != "" {
+		data["publishKey"] = s.PublishKey
 	}
-	if args.PublishSecurity != "" {
-		data["publishSecurity"] = args.PublishSecurity
+	if s.PublishSecurity != "" {
+		data["publishSecurity"] = s.PublishSecurity
 	}
 	url := fmt.Sprintf("%s/streams/%s", API_BASE_URL, s.Id)
 	err = s.conn.PostCall(&stream, url, data)

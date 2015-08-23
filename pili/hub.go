@@ -5,19 +5,19 @@ import (
 	"net/http"
 )
 
-type Client struct {
-	conn RPC_Client
-	hub  string
+type Hub struct {
+	conn    RPC_Client
+	hubName string
 }
 
-func NewClient(mac *Mac, hub string) Client {
-	t := NewTransport(mac, nil)
+func NewHub(creds *Credentials, hubName string) Hub {
+	t := NewTransport(creds, nil)
 	tc := &http.Client{Transport: t}
-	return Client{conn: RPC_Client{tc}, hub: hub}
+	return Hub{conn: RPC_Client{tc}, hubName: hubName}
 }
 
-func (c Client) CreateStream(args OptionalArguments) (stream Stream, err error) {
-	data := map[string]interface{}{"hub": c.hub}
+func (c Hub) CreateStream(args OptionalArguments) (stream Stream, err error) {
+	data := map[string]interface{}{"hub": c.hubName}
 	if args.Title != "" {
 		data["title"] = args.Title
 	}
@@ -36,7 +36,7 @@ func (c Client) CreateStream(args OptionalArguments) (stream Stream, err error) 
 	return
 }
 
-func (c Client) GetStream(id string) (stream Stream, err error) {
+func (c Hub) GetStream(id string) (stream Stream, err error) {
 	url := fmt.Sprintf("%s/streams/%s", API_BASE_URL, id)
 	err = c.conn.GetCall(&stream, url)
 	if err != nil {
@@ -46,8 +46,8 @@ func (c Client) GetStream(id string) (stream Stream, err error) {
 	return
 }
 
-func (c Client) ListStreams(args OptionalArguments) (ret StreamList, err error) {
-	url := fmt.Sprintf("%s/streams?hub=%s", API_BASE_URL, c.hub)
+func (c Hub) ListStreams(args OptionalArguments) (ret StreamList, err error) {
+	url := fmt.Sprintf("%s/streams?hub=%s", API_BASE_URL, c.hubName)
 	if args.Marker != "" {
 		url = fmt.Sprintf("%s&marker=%s", url, args.Marker)
 	}

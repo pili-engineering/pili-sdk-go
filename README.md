@@ -11,8 +11,6 @@
     - [x] stream.Status()
     - [x] stream.Update(options={PublishKey,PublishSecurity})
     - [x] stream.Refresh()
-    - [x] stream.Disable()
-    - [x] stream.Enable()
     - [x] stream.RtmpPublishUrl()
     - [x] stream.RtmpLiveUrls()
     - [x] stream.HlsLiveUrls()
@@ -34,9 +32,9 @@
 	- [Stream](#Stream)
 		- [To JSON String](#To-JSON-String)
     	- [Update a stream](#Update-a-stream)
-		- [Refresh a stream](#Refresh-a-stream)
 		- [Disable a stream](#Disable-a-stream)
 		- [Enable a stream](#Enable-a-stream)
+		- [Refresh a stream](#Refresh-a-stream)
 		- [Get stream segments](#Get-stream-segments)
 		- [Get stream status](#Get-stream-status)
 		- [Generate RTMP publish URL](#Generate-RTMP-publish-URL)
@@ -209,15 +207,35 @@ fmt.Println("Stream ToJSONString:\n", streamJson)
 #### Update a stream
 
 ```go
-options = pili.OptionalArguments{  // optional
-    PublishKey:      "publishKey", // optional
-    PublishSecurity: "dynamic",    // optional
-}
-stream, err = stream.Update(options)
+stream.PublishKey = "myNewPublishKey" // optional
+stream.PublishSecurity = "dynamic"    // optional
+stream, err = stream.Update()
 if err != nil {
     fmt.Println("Error:", err)
 }
 fmt.Println("Stream Updated:\n", stream)
+```
+
+#### Disable a stream
+
+```go
+stream.Disabled = true
+stream, err = stream.Update()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Disabled:\n", stream)
+```
+
+#### Enable a stream
+
+```go
+stream.Disabled = false
+stream, err = stream.Update()
+if err != nil {
+    fmt.Println("Error:", err)
+}
+fmt.Println("Stream Enabled:\n", stream)
 ```
 
 #### Refresh a stream
@@ -228,26 +246,6 @@ if err != nil {
     fmt.Println("Error:", err)
 }
 fmt.Println("Stream Refreshed:\n", stream)
-```
-
-#### Disable a stream
-
-```go
-stream, err = stream.Disable()
-if err != nil {
-    fmt.Println("Error:", err)
-}
-fmt.Println("Stream Disabled:\n", stream)
-```
-
-#### Enable a stream
-
-```go
-stream, err = stream.Enable()
-if err != nil {
-    fmt.Println("Error:", err)
-}
-fmt.Println("Stream Enabled:\n", stream)
 ```
 
 #### Get stream segments
@@ -366,25 +364,30 @@ fmt.Println("Stream Deleted:\n", deleteResult)
 
 ## History
 
+- 1.3.1
+    - Update Stream disable operations logic
+        - Removed stream.Disable() and stream.Enable()
+        - Updated stream.Update() logic
+
 - 1.3.0
     - Add Stream recording
-        - [x] stream.SaveAs(name,format,start,end,options)
+        - stream.SaveAs(name,format,start,end,options)
 
 - 1.2.0
     - Add Stream operations
-    	- [x] stream.ToJSONString()
-    	- [x] stream.Update(options)
-    	- [x] stream.Refresh()
-    	- [x] stream.Disable()
-    	- [x] stream.Enable()
-    	- [x] stream.Segments(options)
-    	- [x] stream.Status()
-    	- [x] stream.RtmpPublishUrl()
-    	- [x] stream.RtmpLiveUrls()
-    	- [x] stream.HlsLiveUrls()
-    	- [x] stream.HlsPlaybackUrls(start,end)
-    	- [x] stream.Delete()
+    	- stream.ToJSONString()
+    	- stream.Update(options)
+    	- stream.Refresh()
+    	- stream.Disable()
+    	- stream.Enable()
+    	- stream.Segments(options)
+    	- stream.Status()
+    	- stream.RtmpPublishUrl()
+    	- stream.RtmpLiveUrls()
+    	- stream.HlsLiveUrls()
+    	- stream.HlsPlaybackUrls(start,end)
+    	- stream.Delete()
     - Update Client functions
-    	- [x] client.CreateStream(options)
-    	- [x] client.GetStream(stream.Id)
-    	- [x] client.ListStreams(options)
+    	- client.CreateStream(options)
+    	- client.GetStream(stream.Id)
+    	- client.ListStreams(options)

@@ -36,12 +36,25 @@ type StreamSegmentList struct {
 }
 
 type StreamStatus struct {
-	Addr   string `json:"addr"`
-	Status string `json:"status"`
+	Addr            string  `json:"addr"`
+	Status          string  `json:"status"`
+	bytesPerSecond  float64 `json:"bytesPerSecond"`
+	framesPerSecond FramesPerSecond
+}
+
+type FramesPerSecond struct {
+	audio float64
+	video float64
+	data  float64
 }
 
 type StreamSaveAsResponse struct {
 	Url          string `json:"url"`
+	TargetUrl    string `json:"targetUrl"`
+	PersistentId string `json:"persistentId"`
+}
+
+type StreamSnapshotResponse struct {
 	TargetUrl    string `json:"targetUrl"`
 	PersistentId string `json:"persistentId"`
 }
