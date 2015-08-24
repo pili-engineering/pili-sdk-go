@@ -90,20 +90,11 @@ func (r RPC) DelCall(ret interface{}, url string) (err error) {
 	return callRet(ret, resp)
 }
 
-type Error struct {
-	Err int    `json:"error"`
-	Msg string `json:"message"`
-}
-
-type ErrorRet struct {
-	Err     int              `json:"error"`
-	Msg     string           `json:"message"`
-	Details map[string]Error `json:"details,omitempty"`
-}
-
 type ErrorInfo struct {
-	ErrorRet
-	Code int
+	Message string           `json:"message"`
+	ErrCode int              `json:"error"`
+	Details map[string]error `json:"details,omitempty"`
+	Code    int              `json:"code"`
 }
 
 func (r *ErrorInfo) Error() string {
@@ -124,6 +115,7 @@ func ResponseError(resp *http.Response) (err error) {
 			}
 		}
 	}
+
 	return e
 }
 
