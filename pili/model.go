@@ -5,7 +5,7 @@ import (
 )
 
 type Stream struct {
-	conn            RPC_Client
+	rpc             *RPC
 	Id              string    `json:"id"`
 	CreatedAt       time.Time `json:"createdAt"`
 	UpdatedAt       time.Time `json:"updatedAt"`
@@ -16,8 +16,9 @@ type Stream struct {
 	PublishSecurity string    `json:"publishSecurity"`
 	Profiles        []string  `json:"profiles,omitempty"`
 	Hosts           struct {
-		Publish map[string]string `json:"publish,omitempty"`
-		Play    map[string]string `json:"play,omitempty"`
+		Publish  map[string]string `json:"publish,omitempty"`
+		Live     map[string]string `json:"live,omitempty"`
+		Playback map[string]string `json:"playback,omitempty"`
 	} `json:"hosts,omitempty"`
 }
 
@@ -38,14 +39,12 @@ type StreamSegmentList struct {
 type StreamStatus struct {
 	Addr            string  `json:"addr"`
 	Status          string  `json:"status"`
-	bytesPerSecond  float64 `json:"bytesPerSecond"`
-	framesPerSecond FramesPerSecond
-}
-
-type FramesPerSecond struct {
-	audio float64
-	video float64
-	data  float64
+	BytesPerSecond  float64 `json:"bytesPerSecond"`
+	FramesPerSecond struct {
+		Audio float64 `json:"audio"`
+		video float64 `json:"video"`
+		Data  float64 `json:"data"`
+	} `json:"framesPerSecond"`
 }
 
 type StreamSaveAsResponse struct {
@@ -68,5 +67,6 @@ type OptionalArguments struct {
 	Limit           uint
 	Start           int64
 	End             int64
+	Time            int64
 	NotifyUrl       string
 }

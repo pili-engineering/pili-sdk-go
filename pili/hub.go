@@ -2,18 +2,15 @@ package pili
 
 import (
 	"fmt"
-	"net/http"
 )
 
 type Hub struct {
-	conn    RPC_Client
+	rpc     *RPC
 	hubName string
 }
 
 func NewHub(creds *Credentials, hubName string) Hub {
-	t := NewTransport(creds, nil)
-	tc := &http.Client{Transport: t}
-	return Hub{conn: RPC_Client{tc}, hubName: hubName}
+	return Hub{rpc: NewRPC(creds), hubName: hubName}
 }
 
 func (c Hub) CreateStream(args OptionalArguments) (stream Stream, err error) {
@@ -27,35 +24,38 @@ func (c Hub) CreateStream(args OptionalArguments) (stream Stream, err error) {
 	if args.PublishSecurity != "" {
 		data["publishSecurity"] = args.PublishSecurity
 	}
-	url := fmt.Sprintf("%s/streams", API_BASE_URL)
-	err = c.conn.PostCall(&stream, url, data)
+	url := fmt.Sprintf("%s/streams", getApiBaseUrl())
+	err = c.rpc.PostCall(&stream, url, data)
 	if err != nil {
 		return
 	}
-	stream.conn = c.conn
+	stream.rpc = c.rpc
 	return
 }
 
 func (c Hub) GetStream(id string) (stream Stream, err error) {
-	url := fmt.Sprintf("%s/streams/%s", API_BASE_URL, id)
-	err = c.conn.GetCall(&stream, url)
+	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), id)
+	err = c.rpc.GetCall(&stream, url)
 	if err != nil {
 		return
 	}
-	stream.conn = c.conn
+	stream.rpc = c.rpc
 	return
 }
 
 func (c Hub) ListStreams(args OptionalArguments) (ret StreamList, err error) {
-	url := fmt.Sprintf("%s/streams?hub=%s", API_BASE_URL, c.hubName)
+	url := fmt.Sprintf("%s/streams?hub=%s", getApiBaseUrl(), c.hubName)
 	if args.Marker != "" {
 		url = fmt.Sprintf("%s&marker=%s", url, args.Marker)
 	}
 	if args.Limit > 0 {
 		url = fmt.Sprintf("%s&limit=%d", url, args.Limit)
 	}
+	if args.Title != "" {
+		url = fmt.Sprintf("%s&title=%s", url, args.Title)
+	}
 	resultWrapper := StreamList{}
-	err = c.conn.GetCall(&resultWrapper, url)
+	err = c.rpc.GetCall(&resultWrapper, url)
 	if err != nil {
 		return
 	}
@@ -63,7 +63,7 @@ func (c Hub) ListStreams(args OptionalArguments) (ret StreamList, err error) {
 	streams := make([]*Stream, count)
 	for i := 0; i < count; i++ {
 		streams[i] = resultWrapper.Items[i]
-		streams[i].conn = c.conn
+		streams[i].rpc = c.rpc
 	}
 	ret.Items = streams
 	ret.Marker = resultWrapper.Marker

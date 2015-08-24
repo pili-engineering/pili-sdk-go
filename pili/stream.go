@@ -11,12 +11,12 @@ import (
 )
 
 func (s Stream) Refresh() (stream Stream, err error) {
-	url := fmt.Sprintf("%s/streams/%s", API_BASE_URL, s.Id)
-	err = s.conn.GetCall(&stream, url)
+	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), s.Id)
+	err = s.rpc.GetCall(&stream, url)
 	if err != nil {
 		return
 	}
-	stream.conn = s.conn
+	stream.rpc = s.rpc
 	return
 }
 
@@ -28,17 +28,17 @@ func (s Stream) ToJSONString() (jsonBlob string, err error) {
 
 func (s Stream) Enable() (stream Stream, err error) {
 	data := map[string]bool{"disabled": false}
-	url := fmt.Sprintf("%s/streams/%s", API_BASE_URL, s.Id)
-	err = s.conn.PostCall(&stream, url, data)
-	stream.conn = s.conn
+	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), s.Id)
+	err = s.rpc.PostCall(&stream, url, data)
+	stream.rpc = s.rpc
 	return
 }
 
 func (s Stream) Disable() (stream Stream, err error) {
 	data := map[string]bool{"disabled": true}
-	url := fmt.Sprintf("%s/streams/%s", API_BASE_URL, s.Id)
-	err = s.conn.PostCall(&stream, url, data)
-	stream.conn = s.conn
+	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), s.Id)
+	err = s.rpc.PostCall(&stream, url, data)
+	stream.rpc = s.rpc
 	return
 }
 
@@ -50,33 +50,36 @@ func (s Stream) Update() (stream Stream, err error) {
 	if s.PublishSecurity != "" {
 		data["publishSecurity"] = s.PublishSecurity
 	}
-	url := fmt.Sprintf("%s/streams/%s", API_BASE_URL, s.Id)
-	err = s.conn.PostCall(&stream, url, data)
-	stream.conn = s.conn
+	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), s.Id)
+	err = s.rpc.PostCall(&stream, url, data)
+	stream.rpc = s.rpc
 	return
 }
 
 func (s Stream) Delete() (ret interface{}, err error) {
-	url := fmt.Sprintf("%s/streams/%s", API_BASE_URL, s.Id)
-	err = s.conn.DelCall(&ret, url)
+	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), s.Id)
+	err = s.rpc.DelCall(&ret, url)
 	return
 }
 
 func (s Stream) Status() (ret StreamStatus, err error) {
-	url := fmt.Sprintf("%s/streams/%s/status", API_BASE_URL, s.Id)
-	err = s.conn.GetCall(&ret, url)
+	url := fmt.Sprintf("%s/streams/%s/status", getApiBaseUrl(), s.Id)
+	err = s.rpc.GetCall(&ret, url)
 	return
 }
 
 func (s Stream) Segments(args OptionalArguments) (ret StreamSegmentList, err error) {
-	url := fmt.Sprintf("%s/streams/%s/segments", API_BASE_URL, s.Id)
+	url := fmt.Sprintf("%s/streams/%s/segments", getApiBaseUrl(), s.Id)
 	if args.Start > 0 {
 		url = fmt.Sprintf("%s?start=%d", url, args.Start)
 	}
 	if args.End > 0 {
 		url = fmt.Sprintf("%s&end=%d", url, args.End)
 	}
-	err = s.conn.GetCall(&ret, url)
+	if args.Limit > 0 {
+		url = fmt.Sprintf("%s&limit=%d", url, args.Limit)
+	}
+	err = s.rpc.GetCall(&ret, url)
 	return
 }
 
@@ -85,8 +88,21 @@ func (s Stream) SaveAs(name, format string, start, end int64, args OptionalArgum
 	if args.NotifyUrl != "" {
 		data["notifyUrl"] = args.NotifyUrl
 	}
-	url := fmt.Sprintf("%s/streams/%s/saveas", API_BASE_URL, s.Id)
-	err = s.conn.PostCall(&ret, url, data)
+	url := fmt.Sprintf("%s/streams/%s/saveas", getApiBaseUrl(), s.Id)
+	err = s.rpc.PostCall(&ret, url, data)
+	return
+}
+
+func (s Stream) Snapshot(name, format string, args OptionalArguments) (ret StreamSnapshotResponse, err error) {
+	data := map[string]interface{}{"name": name, "format": format}
+	if args.Time > 0 {
+		data["time"] = args.Time
+	}
+	if args.NotifyUrl != "" {
+		data["notifyUrl"] = args.NotifyUrl
+	}
+	url := fmt.Sprintf("%s/streams/%s/snapshot", getApiBaseUrl(), s.Id)
+	err = s.rpc.PostCall(&ret, url, data)
 	return
 }
 
@@ -136,12 +152,12 @@ func (s Stream) sign(secret, data []byte) (token string) {
 	return
 }
 
-// RTMP Play URLs
+// RTMP Live Play URLs
 // --------------------------------------------------------------------------------
 
 func (s Stream) RtmpLiveUrls() (urls map[string]string, err error) {
 	urls = make(map[string]string)
-	url := fmt.Sprintf("rtmp://%s/%s/%s", s.Hosts.Play["rtmp"], s.Hub, s.Title)
+	url := fmt.Sprintf("rtmp://%s/%s/%s", s.Hosts.Live["rtmp"], s.Hub, s.Title)
 	urls[ORIGIN] = url
 	for _, profile := range s.Profiles {
 		urls[profile] = fmt.Sprintf("%s@%s", url, profile)
@@ -149,14 +165,26 @@ func (s Stream) RtmpLiveUrls() (urls map[string]string, err error) {
 	return
 }
 
-// HLS Play URLs
+// HLS Live Play URLs
 // --------------------------------------------------------------------------------
 
 func (s Stream) HlsLiveUrls() (urls map[string]string, err error) {
 	urls = make(map[string]string)
-	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8", s.Hosts.Play["hls"], s.Hub, s.Title)
+	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8", s.Hosts.Live["http"], s.Hub, s.Title)
 	for _, profile := range s.Profiles {
-		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8", s.Hosts.Play["hls"], s.Hub, s.Title, profile)
+		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8", s.Hosts.Live["http"], s.Hub, s.Title, profile)
+	}
+	return
+}
+
+// Http-Flv Live Play URLs
+// --------------------------------------------------------------------------------
+
+func (s Stream) HttpFlvLiveUrls() (urls map[string]string, err error) {
+	urls = make(map[string]string)
+	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.flv", s.Hosts.Live["http"], s.Hub, s.Title)
+	for _, profile := range s.Profiles {
+		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.flv", s.Hosts.Live["http"], s.Hub, s.Title, profile)
 	}
 	return
 }
@@ -166,9 +194,9 @@ func (s Stream) HlsLiveUrls() (urls map[string]string, err error) {
 
 func (s Stream) HlsPlaybackUrls(start, end int64) (urls map[string]string, err error) {
 	urls = make(map[string]string)
-	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8?start=%d&end=%d", s.Hosts.Play["hls"], s.Hub, s.Title, start, end)
+	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8?start=%d&end=%d", s.Hosts.Playback["http"], s.Hub, s.Title, start, end)
 	for _, profile := range s.Profiles {
-		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8?start=%d&end=%d", s.Hosts.Play["hls"], s.Hub, s.Title, profile, start, end)
+		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8?start=%d&end=%d", s.Hosts.Playback["http"], s.Hub, s.Title, profile, start, end)
 	}
 	return
 }

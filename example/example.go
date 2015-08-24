@@ -1,7 +1,7 @@
 package main
 
 import (
-	"../pili" // or "github.com/pili-io/pili-sdk-go/pili"
+	"../pili" // or "github.com/pili-engineering/pili-sdk-go/pili"
 	"fmt"
 )
 
@@ -11,30 +11,37 @@ const (
 	ACCESS_KEY = "Qiniu_AccessKey"
 	SECRET_KEY = "Qiniu_SecretKey"
 
-	// Replace with your hub name
-	HUB = "Pili_Hub"
+	// The Hub must be exists before use
+	HUB_NAME = "Pili_Hub_Name"
 )
 
 func main() {
 
-	// Instantiate an Pili client
-	credentials := pili.Creds(ACCESS_KEY, SECRET_KEY)
-	client := pili.NewClient(credentials, HUB)
+	// Change API host as necessary
+	//
+	// pili.qiniuapi.com as deafult
+	// pili-lte.qiniuapi.com is the latest RC version
+	//
+	pili.API_HOST = "pili-lte.qiniuapi.com"
+
+	// Instantiate an Pili Hub object
+	credentials := pili.NewCredentials(ACCESS_KEY, SECRET_KEY)
+	hub := pili.NewHub(credentials, HUB_NAME)
 
 	// Create a new stream
 	options := pili.OptionalArguments{ // optional
 		Title:           "stream_name",       // optional, auto-generated as default
 		PublishKey:      "some_secret_words", // optional, auto-generated as default
-		PublishSecurity: "static",            // optional, can be "dynamic" or "static", "dynamic" as default
+		PublishSecurity: "dynamic",           // optional, can be "dynamic" or "static", "dynamic" as default
 	}
-	stream, err := client.CreateStream(options)
+	stream, err := hub.CreateStream(options)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
 	fmt.Println("CreateStream:\n", stream)
 
 	// Get a stream
-	stream, err = client.GetStream(stream.Id)
+	stream, err = hub.GetStream(stream.Id)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
@@ -42,10 +49,11 @@ func main() {
 
 	// List streams
 	options = pili.OptionalArguments{ // optional
-		Marker: "", // optional, returned by server response
-		Limit:  10, // optional
+		Marker: "",        // optional, returned by server response
+		Limit:  50,        // optional
+		Title:  "prefix_", // optional, title prefix
 	}
-	listResult, err := client.ListStreams(options)
+	listResult, err := hub.ListStreams(options)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
@@ -62,22 +70,13 @@ func main() {
 	fmt.Println("Stream ToJSONString:\n", streamJson)
 
 	// Update a stream
-	options = pili.OptionalArguments{ // optional
-		PublishKey:      "publishKey", // optional
-		PublishSecurity: "dynamic",    // optional
-	}
-	stream, err = stream.Update(options)
+	stream.PublishKey = "new_secret_words" // optional
+	stream.PublishSecurity = "static"      // optional
+	stream, err = stream.Update()
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
 	fmt.Println("Stream Updated:\n", stream)
-
-	// Refresh a stream
-	stream, err = stream.Refresh()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Stream Refreshed:\n", stream)
 
 	// Disable a stream
 	stream, err = stream.Disable()
@@ -93,24 +92,6 @@ func main() {
 	}
 	fmt.Println("Stream Enabled:\n", stream)
 
-	// Get stream segments
-	options = pili.OptionalArguments{ // optional
-		Start: 1439121809, // optional, in second, unix timestamp
-		End:   1439125409, // optional, in second, unix timestamp
-	}
-	segments, err := stream.Segments(options)
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Segments:\n", segments)
-
-	// Get stream status
-	streamStatus, err := stream.Status()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Stream Status:\n", streamStatus)
-
 	// Generate RTMP publish URL
 	url := stream.RtmpPublishUrl()
 	fmt.Println("Stream RtmpPublishUrl:\n", url)
@@ -120,41 +101,67 @@ func main() {
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	fmt.Println("RtmpLiveUrls:")
+	fmt.Println("RtmpLiveUrls:", urls)
 	for k, v := range urls {
 		fmt.Printf("%s:%s\n", k, v)
 	}
-	fmt.Println("Original RtmpLiveUrl:\n", urls[pili.ORIGIN])
 
 	// Generate HLS live play URLs
 	urls, err = stream.HlsLiveUrls()
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	fmt.Println("HlsLiveUrls:")
+	fmt.Println("HlsLiveUrls:", urls)
 	for k, v := range urls {
 		fmt.Printf("%s:%s\n", k, v)
 	}
-	fmt.Println("Original HlsLiveUrl:\n", urls[pili.ORIGIN])
+
+	// Generate Http-Flv live play URLs
+	urls, err = stream.HttpFlvLiveUrls()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("HttpFlvLiveUrls:", urls)
+	for k, v := range urls {
+		fmt.Printf("%s:%s\n", k, v)
+	}
+
+	// Get stream status
+	streamStatus, err := stream.Status()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Stream Status:\n", streamStatus)
+
+	// Get stream segments
+	options = pili.OptionalArguments{ // optional
+		Start: 1440379800, // optional, in second, unix timestamp
+		End:   1440479880, // optional, in second, unix timestamp
+		Limit: 20,         // optional, uint
+	}
+	segments, err := stream.Segments(options)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Segments:\n", segments)
 
 	// Generate HLS playback URLs
-	start := 1439121809
-	end := 1439125409
+	start := 1440379847
+	end := 1440379857
 	urls, err = stream.HlsPlaybackUrls(int64(start), int64(end))
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	fmt.Println("HlsPlaybackUrls:")
+	fmt.Println("HlsPlaybackUrls:", urls)
 	for k, v := range urls {
 		fmt.Printf("%s:%s\n", k, v)
 	}
-	fmt.Println("Original HlsPlaybackUrl:\n", urls[pili.ORIGIN])
 
-	// Save Stream as
-	name := "fileName" // required, string
-	format := "mp4"    // required, string
-	start = 1439121809 // required, int64, in second, unix timestamp
-	end = 1439125409   // required, int64, in second, unix timestamp
+	// Save Stream as a file
+	name := "fileName.mp4" // required, string
+	format := "mp4"        // required, string
+	start = 1440379847     // required, int64, in second, unix timestamp
+	end = 1440379857       // required, int64, in second, unix timestamp
 	options = pili.OptionalArguments{
 		NotifyUrl: "http://remote_callback_url",
 	} // optional
@@ -163,6 +170,19 @@ func main() {
 		fmt.Println("Error:", err)
 	}
 	fmt.Println("Stream save as:\n", saveAsRes)
+
+	// Snapshot Stream
+	name = "fileName.jpg" // required, string
+	format = "jpg"        // required, string
+	options = pili.OptionalArguments{
+		Time:      1440379847, // optional, int64, in second, unit timestamp
+		NotifyUrl: "http://remote_callback_url",
+	} // optional
+	snapshotRes, err := stream.Snapshot(name, format, options)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Stream Snapshot:\n", snapshotRes)
 
 	// Delete a stream
 	deleteResult, err := stream.Delete()
