@@ -89,9 +89,13 @@ func main() {
 #### Instantiate a Pili Hub object
 
 ```go
+func main() {
+
 	credentials := pili.NewCredentials(ACCESS_KEY, SECRET_KEY)
 	hub := pili.NewHub(credentials, HUB_NAME)
+
     // ...
+}
 ```
 
 #### Create a new Stream
