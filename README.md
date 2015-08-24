@@ -91,17 +91,16 @@ func main() {
 ```go
 	credentials := pili.NewCredentials(ACCESS_KEY, SECRET_KEY)
 	hub := pili.NewHub(credentials, HUB_NAME)
-
     // ...
 ```
 
 #### Create a new Stream
 
 ```go
-options := pili.OptionalArguments{        // optional
-    Title:           "stream_name",       // optional, auto-generated as default
-    PublishKey:      "some_secret_words", // optional, auto-generated as default
-    PublishSecurity: "dynamic",           // optional, can be "dynamic" or "static", "dynamic" as default
+options := pili.OptionalArguments{               // optional
+    Title:           "stream_title", // optional, auto-generated as default
+    PublishKey:      "some_secret_words",        // optional, auto-generated as default
+    PublishSecurity: "dynamic",                  // optional, can be "dynamic" or "static", "dynamic" as default
 }
 stream, err := hub.CreateStream(options)
 if err != nil {
@@ -109,7 +108,30 @@ if err != nil {
 }
 fmt.Println("CreateStream:\n", stream)
 /*
-{0xc208036018 z1.coding.55d826b0d409d209d93f6e37 2015-08-22 15:37:20.397 +0800 CST 2015-08-24 09:41:55.32 +0800 CST 55d826b0d409d209d93f6e37 coding false new_secret_words static [] {map[rtmp:as2h9t.publish.z1.pili.qiniup.com] map[http:as2h9t.live1-http.z1.pili.qiniucdn.com rtmp:as2h9t.live1-rtmp.z1.pili.qiniucdn.com] map[http:as2h9t.playback1.z1.pili.qiniucdn.com]}}
+{
+    0xc208036018
+    Id: z1.hub1.stream_title
+    CreatedAt: 2015-08-22 15:37:20.397 +0800 CST
+    UpdatedAt: 2015-08-24 09:41:55.32 +0800 CST
+    Title: stream_title
+    Hub: hub1
+    Disabled: false
+    PublishKey: some_secret_words
+    PublishSecurity: dynamic
+    Profiles: []
+    Hosts: {
+        Publish: map[
+            rtmp:ec2s3f5.publish.z1.pili.qiniup.com
+        ]
+        Live: map[
+            http:ec2s3f5.live1-http.z1.pili.qiniucdn.com
+            rtmp:ec2s3f5.live1-rtmp.z1.pili.qiniucdn.com
+        ]
+        Playback: map[
+            http:ec2s3f5.playback1.z1.pili.qiniucdn.com
+        ]
+    }
+}
 */
 ```
 
@@ -122,7 +144,30 @@ if err != nil {
 }
 fmt.Println("GetStream:\n", stream)
 /*
- {0xc208036018 z1.coding.55d826b0d409d209d93f6e37 2015-08-22 15:37:20.397 +0800 CST 2015-08-24 09:41:55.32 +0800 CST 55d826b0d409d209d93f6e37 coding false new_secret_words static [] {map[rtmp:as2h9t.publish.z1.pili.qiniup.com] map[http:as2h9t.live1-http.z1.pili.qiniucdn.com rtmp:as2h9t.live1-rtmp.z1.pili.qiniucdn.com] map[http:as2h9t.playback1.z1.pili.qiniucdn.com]}}
+{
+    0xc208036018
+    Id: z1.hub1.stream_title
+    CreatedAt: 2015-08-22 15:37:20.397 +0800 CST
+    UpdatedAt: 2015-08-24 09:41:55.32 +0800 CST
+    Title: stream_title
+    Hub: hub1
+    Disabled: false
+    PublishKey: some_secret_words
+    PublishSecurity: dynamic
+    Profiles: []
+    Hosts: {
+        Publish: map[
+            rtmp:ec2s3f5.publish.z1.pili.qiniup.com
+        ]
+        Live: map[
+            http:ec2s3f5.live1-http.z1.pili.qiniucdn.com
+            rtmp:ec2s3f5.live1-rtmp.z1.pili.qiniucdn.com
+        ]
+        Playback: map[
+            http:ec2s3f5.playback1.z1.pili.qiniucdn.com
+        ]
+    }
+}
 */
 ```
 
@@ -144,7 +189,30 @@ for _, stream := range listResult.Items {
 }
 /*
 {1 [0xc208036018]}
-&{0xc208036018 z1.coding.55d826b0d409d209d93f6e37 2015-08-22 15:37:20.397 +0800 CST 2015-08-24 09:41:55.32 +0800 CST 55d826b0d409d209d93f6e37 coding false new_secret_words static [] {map[rtmp:as2h9t.publish.z1.pili.qiniup.com] map[http:as2h9t.live1-http.z1.pili.qiniucdn.com rtmp:as2h9t.live1-rtmp.z1.pili.qiniucdn.com] map[http:as2h9t.playback1.z1.pili.qiniucdn.com]}}
+&{
+    0xc208036018
+    Id: z1.hub1.stream_title
+    CreatedAt: 2015-08-22 15:37:20.397 +0800 CST
+    UpdatedAt: 2015-08-24 09:41:55.32 +0800 CST
+    Title: stream_title
+    Hub: hub1
+    Disabled: false
+    PublishKey: some_secret_words
+    PublishSecurity: dynamic
+    Profiles: []
+    Hosts: {
+        Publish: map[
+            rtmp:ec2s3f5.publish.z1.pili.qiniup.com
+        ]
+        Live: map[
+            http:ec2s3f5.live1-http.z1.pili.qiniucdn.com
+            rtmp:ec2s3f5.live1-rtmp.z1.pili.qiniucdn.com
+        ]
+        Playback: map[
+            http:ec2s3f5.playback1.z1.pili.qiniucdn.com
+        ]
+    }
+}
 */
 ```
 
@@ -158,7 +226,28 @@ if err != nil {
 }
 fmt.Println("Stream ToJSONString:\n", streamJson)
 /*
-{"id":"z1.coding.55d826b0d409d209d93f6e37","createdAt":"2015-08-22T15:37:20.397+08:00","updatedAt":"2015-08-24T09:41:55.32+08:00","title":"55d826b0d409d209d93f6e37","hub":"coding","disabled":false,"publishKey":"new_secret_words","publishSecurity":"static","hosts":{"publish":{"rtmp":"as2h9t.publish.z1.pili.qiniup.com"},"live":{"http":"as2h9t.live1-http.z1.pili.qiniucdn.com","rtmp":"as2h9t.live1-rtmp.z1.pili.qiniucdn.com"},"playback":{"http":"as2h9t.playback1.z1.pili.qiniucdn.com"}}}
+{
+    "id":"z1.hub1.stream_title",
+    "createdAt":"2015-08-22T15:37:20.397+08:00",
+    "updatedAt":"2015-08-24T09:41:55.32+08:00",
+    "title":"stream_title",
+    "hub":"hub1",
+    "disabled":false,
+    "publishKey":"some_secret_words",
+    "publishSecurity":"dynamic",
+    "hosts":{
+        "publish":{
+            "rtmp":"ec2s3f5.publish.z1.pili.qiniup.com"
+        },
+        "live":{
+            "http":"ec2s3f5.live1-http.z1.pili.qiniucdn.com",
+            "rtmp":"ec2s3f5.live1-rtmp.z1.pili.qiniucdn.com"
+        },
+        "playback":{
+            "http":"ec2s3f5.playback1.z1.pili.qiniucdn.com"
+        }
+    }
+}
 */
 ```
 
@@ -173,7 +262,30 @@ if err != nil {
 }
 fmt.Println("Stream Updated:\n", stream)
 /*
-{0xc208036018 z1.coding.55d826b0d409d209d93f6e37 2015-08-22 15:37:20.397 +0800 CST 2015-08-24 09:44:52.318147076 +0800 CST 55d826b0d409d209d93f6e37 coding false new_secret_words static [] {map[rtmp:as2h9t.publish.z1.pili.qiniup.com] map[http:as2h9t.live1-http.z1.pili.qiniucdn.com rtmp:as2h9t.live1-rtmp.z1.pili.qiniucdn.com] map[http:as2h9t.playback1.z1.pili.qiniucdn.com]}}
+{
+    0xc208036018
+    Id: z1.hub1.stream_title
+    CreatedAt: 2015-08-22 15:37:20.397 +0800 CST
+    UpdatedAt: 2015-08-24 09:41:55.32 +0800 CST
+    Title: stream_title
+    Hub: hub1
+    Disabled: false
+    PublishKey: new_secret_words
+    PublishSecurity: static
+    Profiles: []
+    Hosts: {
+        Publish: map[
+            rtmp:ec2s3f5.publish.z1.pili.qiniup.com
+        ]
+        Live: map[
+            http:ec2s3f5.live1-http.z1.pili.qiniucdn.com
+            rtmp:ec2s3f5.live1-rtmp.z1.pili.qiniucdn.com
+        ]
+        Playback: map[
+            http:ec2s3f5.playback1.z1.pili.qiniucdn.com
+        ]
+    }
+}
 */
 ```
 
@@ -209,7 +321,7 @@ false
 url := stream.RtmpPublishUrl()
 fmt.Println("Stream RtmpPublishUrl:\n", url)
 /*
-rtmp://as2h9t.publish.z1.pili.qiniup.com/coding/55d826b0d409d209d93f6e37?key=new_secret_words
+rtmp://ec2s3f5.publish.z1.pili.qiniup.com/hub1/stream_title?key=new_secret_words
 */
 ```
 
@@ -222,7 +334,7 @@ if err != nil {
 }
 fmt.Println("RtmpLiveUrls:", urls)
 /*
-map[ORIGIN:rtmp://as2h9t.live1-rtmp.z1.pili.qiniucdn.com/coding/55d826b0d409d209d93f6e37]
+map[ORIGIN:rtmp://ec2s3f5.live1-rtmp.z1.pili.qiniucdn.com/hub1/stream_title]
 */
 ```
 
@@ -235,7 +347,7 @@ if err != nil {
 }
 fmt.Println("HlsLiveUrls:", urls)
 /*
-map[ORIGIN:http://as2h9t.live1-http.z1.pili.qiniucdn.com/coding/55d826b0d409d209d93f6e37.m3u8]
+map[ORIGIN:http://ec2s3f5.live1-http.z1.pili.qiniucdn.com/hub1/stream_title.m3u8]
 */
 ```
 
@@ -248,7 +360,7 @@ if err != nil {
 }
 fmt.Println("HttpFlvLiveUrls:", urls)
 /*
-[ORIGIN:http://as2h9t.live1-http.z1.pili.qiniucdn.com/coding/55d826b0d409d209d93f6e37.flv]
+map[ORIGIN:http://ec2s3f5.live1-http.z1.pili.qiniucdn.com/hub1/stream_title.flv]
 */
 ```
 
@@ -261,7 +373,16 @@ if err != nil {
 }
 fmt.Println("Stream Status:\n", streamStatus)
 /*
- {114.81.254.172:36317 connected 16870.200000000001 {42.200000000000003 14.733333333333333 0.066666666666666666}}
+ {
+    Addr: 114.81.254.172:36317
+    Status: connected
+    BytesPerSecond: 16870.200000000001
+    FramesPerSecond: {
+        Audio: 42.200000000000003
+        Video: 14.733333333333333
+        Data: 0.066666666666666666
+    }
+}
 */
 ```
 
@@ -294,7 +415,7 @@ if err != nil {
 }
 fmt.Println("HlsPlaybackUrls:", urls)
 /*
-map[ORIGIN:http://as2h9t.playback1.z1.pili.qiniucdn.com/coding/55d826b0d409d209d93f6e37.m3u8?start=1440379847&end=1440379857]
+map[ORIGIN:http://ec2s3f5.playback1.z1.pili.qiniucdn.com/hub1/stream_title.m3u8?start=1440379847&end=1440379857]
 */
 ```
 
@@ -314,7 +435,11 @@ if err != nil {
 }
 fmt.Println("Stream save as:\n", saveAsRes)
 /*
-{http://as2h9t.vod1.z1.pili.qiniucdn.com/recordings/z1.coding.55d826b0d409d209d93f6e37/fileName.m3u8 http://as2h9t.vod1.z1.pili.qiniucdn.com/recordings/z1.coding.55d826b0d409d209d93f6e37/fileName.mp4 z1.55da7715f51b82403b01e985}
+{
+    Url: http://ec2s3f5.vod1.z1.pili.qiniucdn.com/recordings/z1.hub1.stream_title/fileName.m3u8
+    TargetUrl: http://ec2s3f5.vod1.z1.pili.qiniucdn.com/recordings/z1.hub1.stream_title/fileName.mp4
+    PersistentId: z1.55da7715f51b82403b01e985
+}
 */
 ```
 
@@ -337,7 +462,10 @@ if err != nil {
 }
 fmt.Println("Stream Snapshot:\n", snapshotRes)
 /*
-{http://as2h9t.static1.z1.pili.qiniucdn.com/snapshots/z1.coding.55d826b0d409d209d93f6e37/fileName.jpg z1.55da7716f51b82403b01e986}
+{
+    TargetUrl: http://ec2s3f5.static1.z1.pili.qiniucdn.com/snapshots/z1.hub1.stream_title/fileName.jpg
+    PersistentId: z1.55da7716f51b82403b01e986
+}
 */
 ```
 

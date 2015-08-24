@@ -42,7 +42,7 @@ type StreamStatus struct {
 	BytesPerSecond  float64 `json:"bytesPerSecond"`
 	FramesPerSecond struct {
 		Audio float64 `json:"audio"`
-		video float64 `json:"video"`
+		Video float64 `json:"video"`
 		Data  float64 `json:"data"`
 	} `json:"framesPerSecond"`
 }
