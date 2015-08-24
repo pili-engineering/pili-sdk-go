@@ -86,7 +86,7 @@ func main() {
 
 ### Hub
 
-#### Instantiate an Pili Hub object
+#### Instantiate a Pili Hub object
 
 ```go
 

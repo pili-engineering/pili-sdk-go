@@ -24,7 +24,7 @@ func main() {
 	//
 	pili.API_HOST = "pili-lte.qiniuapi.com"
 
-	// Instantiate an Pili Hub object
+	// Instantiate a Pili Hub object
 	credentials := pili.NewCredentials(ACCESS_KEY, SECRET_KEY)
 	hub := pili.NewHub(credentials, HUB_NAME)
 
