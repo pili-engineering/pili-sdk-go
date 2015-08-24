@@ -49,7 +49,7 @@
 - [History](#history)
 
 
-## Installaion
+## Installation
 
 ```
 // install latest version
