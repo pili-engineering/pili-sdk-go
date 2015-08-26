@@ -19,10 +19,10 @@ func main() {
 
 	// Change API host as necessary
 	//
-	// pili.qiniuapi.com as deafult
+	// pili.qiniuapi.com as default
 	// pili-lte.qiniuapi.com is the latest RC version
 	//
-	pili.API_HOST = "pili-lte.qiniuapi.com"
+	// pili.API_HOST = "pili.qiniuapi.com" // default
 
 	// Instantiate a Pili Hub object
 	credentials := pili.NewCredentials(ACCESS_KEY, SECRET_KEY)
