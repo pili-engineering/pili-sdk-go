@@ -489,6 +489,9 @@ fmt.Println("Stream Deleted:\n", deleteResult)
 
 ## History
 
+- 1.5.1
+    - Update hub.ListStreams(options={Status, Marker,Limit, Title})
+
 - 1.5.0
     - Add stream.HttpFlvLiveUrls()
     - Add stream.Snapshot(name,format string, options={time, notifyUrl})
