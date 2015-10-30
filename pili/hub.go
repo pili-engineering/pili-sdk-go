@@ -45,6 +45,9 @@ func (c Hub) GetStream(id string) (stream Stream, err error) {
 
 func (c Hub) ListStreams(args OptionalArguments) (ret StreamList, err error) {
 	url := fmt.Sprintf("%s/streams?hub=%s", getApiBaseUrl(), c.hubName)
+	if args.Status != "" {
+		url = fmt.Sprintf("%s&status=%s", url, args.Status)
+	}
 	if args.Marker != "" {
 		url = fmt.Sprintf("%s&marker=%s", url, args.Marker)
 	}

@@ -170,9 +170,9 @@ func (s Stream) RtmpLiveUrls() (urls map[string]string, err error) {
 
 func (s Stream) HlsLiveUrls() (urls map[string]string, err error) {
 	urls = make(map[string]string)
-	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8", s.Hosts.Live["http"], s.Hub, s.Title)
+	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8", s.Hosts.Live["hls"], s.Hub, s.Title)
 	for _, profile := range s.Profiles {
-		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8", s.Hosts.Live["http"], s.Hub, s.Title, profile)
+		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8", s.Hosts.Live["hls"], s.Hub, s.Title, profile)
 	}
 	return
 }
@@ -182,9 +182,9 @@ func (s Stream) HlsLiveUrls() (urls map[string]string, err error) {
 
 func (s Stream) HttpFlvLiveUrls() (urls map[string]string, err error) {
 	urls = make(map[string]string)
-	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.flv", s.Hosts.Live["http"], s.Hub, s.Title)
+	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.flv", s.Hosts.Live["hdl"], s.Hub, s.Title)
 	for _, profile := range s.Profiles {
-		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.flv", s.Hosts.Live["http"], s.Hub, s.Title, profile)
+		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.flv", s.Hosts.Live["hdl"], s.Hub, s.Title, profile)
 	}
 	return
 }
@@ -194,9 +194,9 @@ func (s Stream) HttpFlvLiveUrls() (urls map[string]string, err error) {
 
 func (s Stream) HlsPlaybackUrls(start, end int64) (urls map[string]string, err error) {
 	urls = make(map[string]string)
-	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8?start=%d&end=%d", s.Hosts.Playback["http"], s.Hub, s.Title, start, end)
+	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8?start=%d&end=%d", s.Hosts.Playback["hls"], s.Hub, s.Title, start, end)
 	for _, profile := range s.Profiles {
-		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8?start=%d&end=%d", s.Hosts.Playback["http"], s.Hub, s.Title, profile, start, end)
+		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8?start=%d&end=%d", s.Hosts.Playback["hls"], s.Hub, s.Title, profile, start, end)
 	}
 	return
 }

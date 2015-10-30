@@ -179,6 +179,7 @@ fmt.Println("GetStream:\n", stream)
 
 ```go
 options = pili.OptionalArguments{ // optional
+    // Status: "connected", // optional
     Marker: "",        // optional, returned by server response
     Limit:  50,        // optional
     Title:  "prefix_", // optional, title prefix

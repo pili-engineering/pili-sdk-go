@@ -27,17 +27,30 @@ type StreamList struct {
 	Items  []*Stream `json:"items"`
 }
 
+type StreamId struct {
+	Id string `json:"id"`
+}
+
+type StreamIdList struct {
+	Marker string      `json:"marker"`
+	Items  []*StreamId `json:"items"`
+}
+
 type StreamSegment struct {
 	Start int64 `json:"start"`
 	End   int64 `json:"end"`
 }
 
 type StreamSegmentList struct {
+	Start    int64            `json:"start"`
+	End      int64            `json:"end"`
+	Duration int64            `json:"duration"`
 	Segments []*StreamSegment `json:"segments"`
 }
 
 type StreamStatus struct {
 	Addr            string  `json:"addr"`
+	StartFrom       string  `json:"startFrom"`
 	Status          string  `json:"status"`
 	BytesPerSecond  float64 `json:"bytesPerSecond"`
 	FramesPerSecond struct {
@@ -63,10 +76,14 @@ type OptionalArguments struct {
 	PublishKey      string
 	PublishSecurity string
 	Disabled        bool
+	Hub             string
+	Idonly          string
+	Status          string
 	Marker          string
 	Limit           uint
 	Start           int64
 	End             int64
 	Time            int64
 	NotifyUrl       string
+	UserPipeline    string
 }

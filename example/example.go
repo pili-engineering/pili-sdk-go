@@ -49,9 +49,10 @@ func main() {
 
 	// List streams
 	options = pili.OptionalArguments{ // optional
-		Marker: "",        // optional, returned by server response
-		Limit:  50,        // optional
-		Title:  "prefix_", // optional, title prefix
+	//Status: "connected", // optional
+	//Marker: "",          // optional, returned by server response
+	//Limit:  50,          // optional
+	//Title:  "",          // optional, title prefix
 	}
 	listResult, err := hub.ListStreams(options)
 	if err != nil {

@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	SDK_VERSION         = "1.5.0"
+	SDK_VERSION         = "1.5.1"
 	SDK_USER_AGENT      = "pili-sdk-go"
 	DEFAULT_API_VERSION = "v1"
 	DEFAULT_API_HOST    = "pili.qiniuapi.com"
