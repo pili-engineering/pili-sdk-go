@@ -5,7 +5,7 @@
 - Stream Create,Get,List
     - [x] hub.CreateStream(options={Title,PublishKey,PublishSecurity})
     - [x] hub.GetStream(stream.Id)
-    - [x] hub.ListStreams(options={Marker,Limit, Title})
+    - [x] hub.ListStreams(options={Status,Marker,Limit,Title})
 - Stream operations else
     - [x] stream.ToJSONString()
     - [x] stream.Status()
