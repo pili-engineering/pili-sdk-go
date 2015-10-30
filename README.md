@@ -497,7 +497,7 @@ fmt.Println("Stream Deleted:\n", deleteResult)
     - Add stream.Snapshot(name,format string, options={time, notifyUrl})
 
 - 1.3.1
-    - Updated stream.Update() logic
+    - Update stream.Update() logic
 
 - 1.3.0
     - Add stream.SaveAs(name,format string, start,end int64, options={notifyUrl})
