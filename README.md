@@ -489,12 +489,15 @@ fmt.Println("Stream Deleted:\n", deleteResult)
 
 ## History
 
+- 1.5.1
+    - Update hub.ListStreams(options={Status, Marker,Limit, Title})
+
 - 1.5.0
     - Add stream.HttpFlvLiveUrls()
     - Add stream.Snapshot(name,format string, options={time, notifyUrl})
 
 - 1.3.1
-    - Updated stream.Update() logic
+    - Update stream.Update() logic
 
 - 1.3.0
     - Add stream.SaveAs(name,format string, start,end int64, options={notifyUrl})
