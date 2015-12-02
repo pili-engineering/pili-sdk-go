@@ -70,5 +70,6 @@ func (c Hub) ListStreams(args OptionalArguments) (ret StreamList, err error) {
 	}
 	ret.Items = streams
 	ret.Marker = resultWrapper.Marker
+	ret.End = resultWrapper.End
 	return
 }

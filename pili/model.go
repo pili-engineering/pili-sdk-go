@@ -25,6 +25,7 @@ type Stream struct {
 type StreamList struct {
 	Marker string    `json:"marker"`
 	Items  []*Stream `json:"items"`
+	End    bool      `json:"end"`
 }
 
 type StreamId struct {
