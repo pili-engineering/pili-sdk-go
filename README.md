@@ -61,15 +61,18 @@ $ go get github.com/pili-engineering/pili-sdk-go/pili
 ### Configuration
 
 ```go
+package main
+
 import (
     "github.com/pili-engineering/pili-sdk-go/pili"
+    "fmt"
     // ...
 )
 
 const (
 	ACCESS_KEY = "Qiniu_AccessKey"
 	SECRET_KEY = "Qiniu_SecretKey"
-	HUB        = "Pili_HubName"   // The Hub must be exists before use
+	HUB_NAME   = "Pili_HubName"   // The Hub must be exists before use
 )
 
 func main() {
