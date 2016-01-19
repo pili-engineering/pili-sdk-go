@@ -51,6 +51,8 @@
 
 ## Installation
 
+before next step, install git.
+
 ```
 // install latest version
 $ go get github.com/pili-engineering/pili-sdk-go/pili
