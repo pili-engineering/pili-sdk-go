@@ -90,8 +90,6 @@ func (s Stream) SaveAs(name string, start, end int64, args OptionalArguments) (r
 	}
 	if args.Format != "" {
 		data["format"] = args.Format
-	} else {
-		data["format"] = ""
 	}
 	url := fmt.Sprintf("%s/streams/%s/saveas", getApiBaseUrl(), s.Id)
 	fmt.Println("saveas url:", url, "data:", data)
