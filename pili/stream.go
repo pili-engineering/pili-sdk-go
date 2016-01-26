@@ -83,12 +83,18 @@ func (s Stream) Segments(args OptionalArguments) (ret StreamSegmentList, err err
 	return
 }
 
-func (s Stream) SaveAs(name, format string, start, end int64, args OptionalArguments) (ret StreamSaveAsResponse, err error) {
-	data := map[string]interface{}{"name": name, "format": format, "start": start, "end": end}
+func (s Stream) SaveAs(name string, start, end int64, args OptionalArguments) (ret StreamSaveAsResponse, err error) {
+	data := map[string]interface{}{"name": name, "start": start, "end": end}
 	if args.NotifyUrl != "" {
 		data["notifyUrl"] = args.NotifyUrl
 	}
+	if args.Format != "" {
+		data["format"] = args.Format
+	} else {
+		data["format"] = ""
+	}
 	url := fmt.Sprintf("%s/streams/%s/saveas", getApiBaseUrl(), s.Id)
+	fmt.Println("saveas url:", url, "data:", data)
 	err = s.rpc.PostCall(&ret, url, data)
 	return
 }
@@ -159,9 +165,6 @@ func (s Stream) RtmpLiveUrls() (urls map[string]string, err error) {
 	urls = make(map[string]string)
 	url := fmt.Sprintf("rtmp://%s/%s/%s", s.Hosts.Live["rtmp"], s.Hub, s.Title)
 	urls[ORIGIN] = url
-	for _, profile := range s.Profiles {
-		urls[profile] = fmt.Sprintf("%s@%s", url, profile)
-	}
 	return
 }
 
@@ -171,9 +174,6 @@ func (s Stream) RtmpLiveUrls() (urls map[string]string, err error) {
 func (s Stream) HlsLiveUrls() (urls map[string]string, err error) {
 	urls = make(map[string]string)
 	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8", s.Hosts.Live["hls"], s.Hub, s.Title)
-	for _, profile := range s.Profiles {
-		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8", s.Hosts.Live["hls"], s.Hub, s.Title, profile)
-	}
 	return
 }
 
@@ -183,9 +183,6 @@ func (s Stream) HlsLiveUrls() (urls map[string]string, err error) {
 func (s Stream) HttpFlvLiveUrls() (urls map[string]string, err error) {
 	urls = make(map[string]string)
 	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.flv", s.Hosts.Live["hdl"], s.Hub, s.Title)
-	for _, profile := range s.Profiles {
-		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.flv", s.Hosts.Live["hdl"], s.Hub, s.Title, profile)
-	}
 	return
 }
 
@@ -193,10 +190,13 @@ func (s Stream) HttpFlvLiveUrls() (urls map[string]string, err error) {
 // --------------------------------------------------------------------------------
 
 func (s Stream) HlsPlaybackUrls(start, end int64) (urls map[string]string, err error) {
-	urls = make(map[string]string)
-	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8?start=%d&end=%d", s.Hosts.Playback["hls"], s.Hub, s.Title, start, end)
-	for _, profile := range s.Profiles {
-		urls[profile] = fmt.Sprintf("http://%s/%s/%s@%s.m3u8?start=%d&end=%d", s.Hosts.Playback["hls"], s.Hub, s.Title, profile, start, end)
+	name := fmt.Sprintf("%d", time.Now().Unix())
+	ret, err := s.SaveAs(name, start, end, OptionalArguments{})
+	if err != nil {
+		return nil, err
 	}
+
+	urls = make(map[string]string)
+	urls[ORIGIN] = ret.Url
 	return
 }

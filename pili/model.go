@@ -87,4 +87,5 @@ type OptionalArguments struct {
 	Time            int64
 	NotifyUrl       string
 	UserPipeline    string
+	Format          string
 }
