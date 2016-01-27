@@ -489,6 +489,8 @@ fmt.Println("Stream Deleted:\n", deleteResult)
 
 ## History
 
+- 1.5.2
+    - Use SaveAs in HlsPlaybackUrls
 - 1.5.1
     - Update hub.ListStreams(options={Status, Marker,Limit, Title})
 
