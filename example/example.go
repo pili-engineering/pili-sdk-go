@@ -160,9 +160,9 @@ func main() {
 
 	// Save Stream as a file
 	name := "fileName.mp4" // required, string
-	format := "mp4"        // required, string
 	start = 1440379847     // required, int64, in second, unix timestamp
 	end = 1440379857       // required, int64, in second, unix timestamp
+	format := "mp4"        // optional, string
 	options = pili.OptionalArguments{
 		NotifyUrl: "http://remote_callback_url",
 	} // optional

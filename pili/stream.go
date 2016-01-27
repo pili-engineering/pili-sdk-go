@@ -83,13 +83,13 @@ func (s Stream) Segments(args OptionalArguments) (ret StreamSegmentList, err err
 	return
 }
 
-func (s Stream) SaveAs(name string, start, end int64, args OptionalArguments) (ret StreamSaveAsResponse, err error) {
+func (s Stream) SaveAs(name, format string, start, end int64, args OptionalArguments) (ret StreamSaveAsResponse, err error) {
 	data := map[string]interface{}{"name": name, "start": start, "end": end}
 	if args.NotifyUrl != "" {
 		data["notifyUrl"] = args.NotifyUrl
 	}
-	if args.Format != "" {
-		data["format"] = args.Format
+	if format != "" {
+		data["format"] = format
 	}
 	url := fmt.Sprintf("%s/streams/%s/saveas", getApiBaseUrl(), s.Id)
 	fmt.Println("saveas url:", url, "data:", data)
@@ -189,7 +189,7 @@ func (s Stream) HttpFlvLiveUrls() (urls map[string]string, err error) {
 
 func (s Stream) HlsPlaybackUrls(start, end int64) (urls map[string]string, err error) {
 	name := fmt.Sprintf("%d", time.Now().Unix())
-	ret, err := s.SaveAs(name, start, end, OptionalArguments{})
+	ret, err := s.SaveAs(name, "", start, end, OptionalArguments{})
 	if err != nil {
 		return nil, err
 	}
