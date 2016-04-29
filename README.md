@@ -433,11 +433,12 @@ map[ORIGIN:http://ec2s3f5.playback1.z1.pili.qiniucdn.com/hub1/stream_title.m3u8?
 
 ```go
 name := "fileName.mp4" // required, string
-format := "mp4"        // required, string
 start = 1440379847     // required, int64, in second, unix timestamp
 end = 1440379857       // required, int64, in second, unix timestamp
+format := "mp4"        // optional, string
 options = pili.OptionalArguments{
     NotifyUrl: "http://remote_callback_url",
+    UserPipeline: "user_pipeline",
 } // optional
 saveAsRes, err := stream.SaveAs(name, format, int64(start), int64(end), options)
 if err != nil {
@@ -494,6 +495,8 @@ fmt.Println("Stream Deleted:\n", deleteResult)
 
 ## History
 
+- 1.5.3
+    - Add UserPipeline in SaveAs
 - 1.5.2
     - Use SaveAs in HlsPlaybackUrls
 - 1.5.1

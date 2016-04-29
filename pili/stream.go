@@ -88,6 +88,9 @@ func (s Stream) SaveAs(name, format string, start, end int64, args OptionalArgum
 	if args.NotifyUrl != "" {
 		data["notifyUrl"] = args.NotifyUrl
 	}
+	if args.UserPipeline != "" {
+		data["pipeline"] = args.UserPipeline
+	}
 	if format != "" {
 		data["format"] = format
 	}
