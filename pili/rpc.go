@@ -3,134 +3,125 @@ package pili
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
-func NewRPC(creds *Credentials) *RPC {
-	t := NewTransport(creds, nil)
-	tc := http.Client{Transport: t}
-	return &RPC{&tc}
+type rpc struct {
+	http.Client
 }
 
-type RPC struct {
-	*http.Client
+func newRPC(tr http.RoundTripper) *rpc {
+	return &rpc{Client: http.Client{
+		Transport: tr,
+	}}
 }
 
-func (r RPC) Do(req *http.Request) (resp *http.Response, err error) {
-	req.Header.Set("User-Agent", UserAgent())
-	resp, err = r.Client.Do(req)
-	if err != nil {
-		return
-	}
-	return
-}
-
-func (r RPC) RequestWith(
-	method string,
-	url string,
-	bodyType string,
-	body io.Reader,
-	bodyLength int) (resp *http.Response, err error) {
-
+func (r *rpc) do(method, url, bodyType string, body io.Reader, bodyLength int) (resp *http.Response, err error) {
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return
 	}
 	req.Header.Set("Content-Type", bodyType)
+	req.Header.Set("User-Agent", APIUserAgent)
 	req.ContentLength = int64(bodyLength)
 	return r.Do(req)
 }
 
-func (r RPC) Post(url string, data interface{}) (resp *http.Response, err error) {
-	msg, err := json.Marshal(data)
-	if err != nil {
-		return
-	}
-	return r.RequestWith("POST", url, "application/json", bytes.NewReader(msg), len(msg))
-}
-
-func (r RPC) Get(url string) (resp *http.Response, err error) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return
-	}
-	return r.Do(req)
-}
-
-func (r RPC) Del(url string) (resp *http.Response, err error) {
-	req, err := http.NewRequest("DELETE", url, nil)
-	if err != nil {
-		return
-	}
-	return r.Do(req)
-}
-
-func (r RPC) PostCall(ret interface{}, url string, params interface{}) (err error) {
-	resp, err := r.Post(url, params)
+func (r *rpc) Call(ret interface{}, method, url string) error {
+	resp, err := r.do(method, url, "application/x-www-form-urlencoded", nil, 0)
 	if err != nil {
 		return err
 	}
 	return callRet(ret, resp)
 }
 
-func (r RPC) GetCall(ret interface{}, url string) (err error) {
-	resp, err := r.Get(url)
+func (r *rpc) CallWithJSON(ret interface{}, method, url string, param interface{}) error {
+	msg, err := json.Marshal(param)
+	if err != nil {
+		return err
+	}
+	resp, err := r.do(method, url, "application/json", bytes.NewReader(msg), len(msg))
 	if err != nil {
 		return err
 	}
 	return callRet(ret, resp)
 }
 
-func (r RPC) DelCall(ret interface{}, url string) (err error) {
-	resp, err := r.Del(url)
+// --------------------------------------------------------------------
+
+// Error 错误信息.
+type Error struct {
+	Err   string `json:"error,omitempty"` // 错误信息.
+	Code  int    `json:"code,omitempty"`  // HTTP 状态码, 0 意味着请求没有到达服务端.
+	Reqid string `json:"reqid,omitempty"` // 请求标识, 一般是唯一的.
+	Key   string `json:"key,omitempty"`   // 服务端内部关键字.
+	Errno int    `json:"errno,omitempty"` // 服务端内部错误码.
+}
+
+// Error 返回错误信息.
+func (e *Error) Error() string {
+	if e.Err == "" {
+		return fmt.Sprintf("code(%d)", e.Code)
+	}
+	return e.Err
+}
+
+// --------------------------------------------------------------------
+
+func parseError(e *Error, r io.Reader) {
+	b, err := ioutil.ReadAll(io.LimitReader(r, 4096))
 	if err != nil {
-		return err
+		e.Err = err.Error()
+		return
 	}
-	return callRet(ret, resp)
-}
-
-type ErrorInfo struct {
-	Message string           `json:"message"`
-	ErrCode int              `json:"error"`
-	Details map[string]error `json:"details,omitempty"`
-	Code    int              `json:"code"`
-}
-
-func (r *ErrorInfo) Error() string {
-	msg, _ := json.Marshal(r)
-	return string(msg)
-}
-
-func ResponseError(resp *http.Response) (err error) {
-
-	e := &ErrorInfo{
-		Code: resp.StatusCode,
+	var ret struct {
+		Err   string `json:"error"`
+		Key   string `json:"key"`
+		Errno int    `json:"errno"`
 	}
+	if err := json.Unmarshal(b, &ret); err == nil && ret.Err != "" {
+		e.Err, e.Key, e.Errno = ret.Err, ret.Key, ret.Errno
+		return
+	}
+	e.Err = string(b)
+}
 
+func responseError(resp *http.Response) error {
+	e := &Error{
+		Reqid: resp.Header.Get("X-Reqid"),
+		Code:  resp.StatusCode,
+	}
 	if resp.StatusCode > 299 {
 		if resp.ContentLength != 0 {
-			if ct, ok := resp.Header["Content-Type"]; ok && ct[0] == "application/json" {
-				json.NewDecoder(resp.Body).Decode(&e)
+			ct := resp.Header.Get("Content-Type")
+			if strings.HasPrefix(ct, "application/json") {
+				parseError(e, resp.Body)
 			}
 		}
 	}
-
 	return e
 }
 
-func callRet(ret interface{}, resp *http.Response) (err error) {
-
-	defer resp.Body.Close()
+func callRet(ret interface{}, resp *http.Response) error {
+	defer func() {
+		io.Copy(ioutil.Discard, io.LimitReader(resp.Body, 4096))
+		resp.Body.Close()
+	}()
 
 	if resp.StatusCode/100 == 2 {
 		if ret != nil && resp.ContentLength != 0 {
-			err = json.NewDecoder(resp.Body).Decode(ret)
+			err := json.NewDecoder(resp.Body).Decode(ret)
 			if err != nil {
-				return
+				return err
 			}
 		}
-		return
+		if resp.StatusCode == 200 {
+			return nil
+		}
 	}
-	return ResponseError(resp)
+	return responseError(resp)
 }

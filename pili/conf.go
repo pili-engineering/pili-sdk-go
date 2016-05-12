@@ -5,39 +5,11 @@ import (
 	"runtime"
 )
 
-const (
-	SDK_VERSION         = "1.5.2"
-	SDK_USER_AGENT      = "pili-sdk-go"
-	DEFAULT_API_VERSION = "v1"
-	DEFAULT_API_HOST    = "pili.qiniuapi.com"
-	ORIGIN              = "ORIGIN"
-)
+// APIHost 指定了 API 服务器的地址
+var APIHost = "pili.qiniuapi.com"
 
-var (
-	API_HOST  string
-	USE_HTTPS bool
-)
+// APIUserAgent 指定了在请求 API 服务器时填充的 UserAgent Header.
+var APIUserAgent = fmt.Sprintf("pili-sdk-go/v2 %s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH)
 
-func UserAgent() string {
-	return fmt.Sprintf("%s/%s %s %s/%s", SDK_USER_AGENT, SDK_VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH)
-}
-
-func getHttpScheme() (scheme string) {
-	scheme = "http"
-	if USE_HTTPS {
-		scheme = "https"
-	}
-	return
-}
-
-func getApiHost() (host string) {
-	host = DEFAULT_API_HOST
-	if API_HOST != "" {
-		host = API_HOST
-	}
-	return
-}
-
-func getApiBaseUrl() (url string) {
-	return fmt.Sprintf("%s://%s/%s", getHttpScheme(), getApiHost(), DEFAULT_API_VERSION)
-}
+// APIHTTPScheme 指定了在请求 API 服务器时使用的 HTTP 模式.
+var APIHTTPScheme = "http://"
