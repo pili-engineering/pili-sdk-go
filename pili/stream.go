@@ -48,7 +48,7 @@ func (s *Stream) Enable() error {
 // FPSStatus 帧率状态
 type FPSStatus struct {
 	Audio int `json:"audio"`
-	Vedio int `json:"vedio"`
+	Video int `json:"video"`
 	Data  int `json:"data"`
 }
 
@@ -68,7 +68,7 @@ type LiveStatus struct {
 // LiveStatus 查询直播状态.
 func (s *Stream) LiveStatus() (status *LiveStatus, err error) {
 	path := s.baseURL + "/live"
-	err = s.client.Call(status, "GET", path)
+	err = s.client.Call(&status, "GET", path)
 	return
 }
 
