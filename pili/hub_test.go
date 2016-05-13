@@ -52,7 +52,11 @@ func TestHub(t *testing.T) {
 	require.NoError(t, err)
 	sort.Strings(keys)
 	require.Equal(t, keys, []string{keyA, keyB})
-	require.Equal(t, marker, "")
+	if marker != "" {
+		keys, marker, err = hub.List(prefix, 0, marker)
+		require.NoError(t, err)
+		require.True(t, len(keys) == 0 && marker == "", "keys=%v marker=%v", keys, marker)
+	}
 
 	// List one by one.
 	keys0, marker, err := hub.List(prefix, 1, "")
@@ -61,7 +65,7 @@ func TestHub(t *testing.T) {
 	require.NotEqual(t, marker, "")
 	keys1, marker, err := hub.List(prefix, 1, marker)
 	require.NoError(t, err)
-	require.True(t, len(keys1) == 1 && keys1[0] != keys0[0] && (keys1[0] == keyA || keys1[0] == keyB), "got %v", keys1, keys0)
+	require.True(t, len(keys1) == 1 && keys1[0] != keys0[0] && (keys1[0] == keyA || keys1[0] == keyB), "got keys1=%v keys0=%v", keys1, keys0)
 	require.NotEqual(t, marker, "")
 	keys, marker, err = hub.List(prefix, 1, marker)
 	require.NoError(t, err)

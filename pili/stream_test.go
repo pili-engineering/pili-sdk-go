@@ -37,13 +37,20 @@ func TestStream(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, checkStream(stream, testHub, key, false))
 
-	// LiveStatus.
+	// LiveStatus, no live.
 	_, err = stream.LiveStatus()
 	require.Error(t, err)
 	e, ok := err.(*Error)
 	require.True(t, ok && e.Code == 619)
 
-	// TODO: Saveas.
+	// Save, not found.
+	_, err = stream.Save(0, 0)
+	require.Error(t, err)
+	e, ok = err.(*Error)
+	require.True(t, ok && e.Code == 619)
 
-	// TODO: HistoryRecord.
+	// HistoryRecord, empty.
+	records, err := stream.HistoryRecord(0, 0)
+	require.NoError(t, err)
+	require.True(t, len(records) == 0)
 }

@@ -84,26 +84,25 @@ func appendQuery(path string, start, end int64) string {
 	return path
 }
 
-type saveasArgs struct {
-	Key   string `json:"key"`
-	Start int64  `json:"start"`
-	End   int64  `json:"end"`
+type saveArgs struct {
+	Start int64 `json:"start"`
+	End   int64 `json:"end"`
 }
 
-// Saveas 保存直播回放.
-// key 指保存后的文件名, 必须以 m3u8 结尾.
+// Save 保存直播回放.
 // start, end 是 Unix 时间戳, 限定了保存的直播的时间范围, 0 值表示不限定, 系统会默认保存最近一次直播的内容.
-func (s *Stream) Saveas(key string, start, end int64) (hash string, err error) {
+// fname 保存的文件名, 由系统生成.
+func (s *Stream) Save(start, end int64) (fname string, err error) {
 	path := appendQuery(s.baseURL+"/saveas", start, end)
-	args := &saveasArgs{key, start, end}
+	args := &saveArgs{start, end}
 	var ret struct {
-		Hash string `json:"string"`
+		Fname string `json:"fname"`
 	}
 	err = s.client.CallWithJSON(&ret, "POST", path, args)
 	if err != nil {
 		return
 	}
-	hash = ret.Hash
+	fname = ret.Fname
 	return
 }
 
