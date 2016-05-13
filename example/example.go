@@ -137,8 +137,8 @@ func main() {
 	fmt.Printf("keyA=%s 推流历史: records=%v err=(%v)\n", keyA, records, err)
 
 	// 保存直播数据.
-	hash, err := streamA.Saveas(keyA+".saveas", 0, 0)
-	fmt.Printf("keyA=%s 保存直播数据: hash=%s err=(%v)\n", keyA, hash, err)
+	fname, err := streamA.Save(0, 0)
+	fmt.Printf("keyA=%s 保存直播数据: fname=%s err=(%v)\n", keyA, fname, err)
 
 	// RTMP 推流地址.
 	url := client.RTMPPublishURL("publish-rtmp.test.com", HubName, keyA, 3600)
