@@ -1,7 +1,6 @@
 package pili
 
 import (
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -9,8 +8,7 @@ import (
 
 func TestStream(t *testing.T) {
 	if skipTest() {
-		log.Println("WARN: skip TestStream")
-		return
+		t.SkipNow()
 	}
 	client := New(testAccessKey, testSecretKey, nil)
 	hub := NewHub(testHub, client)

@@ -1,7 +1,6 @@
 package pili
 
 import (
-	"log"
 	"sort"
 	"testing"
 
@@ -15,8 +14,7 @@ func checkStream(stream *Stream, hub, key string, disabled bool) bool {
 func TestHub(t *testing.T) {
 
 	if skipTest() {
-		log.Println("WARN: skip TestHub")
-		return
+		t.SkipNow()
 	}
 	client := New(testAccessKey, testSecretKey, nil)
 	hub := NewHub(testHub, client)
