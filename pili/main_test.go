@@ -1,7 +1,6 @@
 package pili
 
 import (
-	"log"
 	"strconv"
 	"strings"
 	"testing"
@@ -31,8 +30,7 @@ func skipTest() bool {
 
 func TestURL(t *testing.T) {
 	if skipTest() {
-		log.Println("WARN: skip TestURL")
-		return
+		t.SkipNow()
 	}
 
 	client := New(testAccessKey, testSecretKey, nil)

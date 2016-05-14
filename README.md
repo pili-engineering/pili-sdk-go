@@ -17,7 +17,7 @@
 	- [x] 禁用流: stream.Disable()
 	- [x] 启用流: stream.Enable()
  	- [x] 查询直播状态: stream.LiveStatus()
-	- [x] 保存直播回放: stream.Saveas(key, start, end)
+	- [x] 保存直播回放: stream.Save(start, end)
 	- [x] 查询直播历史: stream.HistoryRecord(start, end)
 
 ## Contents
@@ -274,12 +274,12 @@ fmt.Println(records)
 #### Save Stream live playback
 
 ```go
-hash, err := stream.Saveas("streamkey.playback", 0, 0)
+fname, err := stream.Save(0, 0)
 if err != nil {
 	return
 }
-fmt.Println(hash)
+fmt.Println(fname)
 /*
-FtVdro8JYNwq4uVFALsKGWDRVaiN
+recordings/z1.PiliSDKTest.streamkey/1463156847_1463157463.m3u8
 */
 ```
