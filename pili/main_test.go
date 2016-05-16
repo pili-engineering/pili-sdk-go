@@ -33,9 +33,9 @@ func TestURL(t *testing.T) {
 		t.SkipNow()
 	}
 
-	client := New(testAccessKey, testSecretKey, nil)
+	mac := &MAC{testAccessKey, []byte(testSecretKey)}
 	expect := "rtmp://publish-rtmp.test.com/" + testHub + "/key?e="
-	result := client.RTMPPublishURL("publish-rtmp.test.com", testHub, "key", 10)
+	result := RTMPPublishURL("publish-rtmp.test.com", testHub, "key", mac, 10)
 	require.True(t, strings.HasPrefix(result, expect))
 
 	expect = "rtmp://live-rtmp.test.com/" + testHub + "/key"

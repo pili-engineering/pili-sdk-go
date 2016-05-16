@@ -11,12 +11,12 @@ import (
 	"qiniupkg.com/x/bytes.v7/seekable"
 )
 
-type mac struct {
+type MAC struct {
 	AccessKey string
 	SecretKey []byte
 }
 
-func (m *mac) Sign(data []byte) string {
+func (m *MAC) Sign(data []byte) string {
 	h := hmac.New(sha1.New, m.SecretKey)
 	h.Write(data)
 	sign := base64.URLEncoding.EncodeToString(h.Sum(nil))
@@ -53,7 +53,7 @@ func signQiniuHeaderValues(header http.Header, w io.Writer) {
 	}
 }
 
-func (m *mac) SignRequest(req *http.Request) (token string, err error) {
+func (m *MAC) SignRequest(req *http.Request) (token string, err error) {
 	h := hmac.New(sha1.New, m.SecretKey)
 
 	u := req.URL
@@ -96,10 +96,10 @@ func (p sortByHeaderKey) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 type transport struct {
 	http.RoundTripper
-	mac *mac
+	mac *MAC
 }
 
-func newTransport(mac *mac, tr http.RoundTripper) *transport {
+func newTransport(mac *MAC, tr http.RoundTripper) *transport {
 	if tr == nil {
 		tr = http.DefaultTransport
 	}

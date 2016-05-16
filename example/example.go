@@ -39,10 +39,11 @@ func main() {
 	//pili.APIHost = "10.200.20.28:7778"
 
 	// 初始化 client.
-	client := pili.New(AccessKey, SecretKey, nil)
+	mac := &pili.MAC{AccessKey: AccessKey, SecretKey: []byte(SecretKey)}
+	client := pili.New(mac, nil)
 
 	// 初始化 Hub.
-	hub := pili.NewHub(HubName, client)
+	hub := client.Hub(HubName)
 
 	// 获得不存在的流.
 	keyA := streamKeyPrefix + "A"
@@ -141,7 +142,7 @@ func main() {
 	fmt.Printf("keyA=%s 保存直播数据: fname=%s err=(%v)\n", keyA, fname, err)
 
 	// RTMP 推流地址.
-	url := client.RTMPPublishURL("publish-rtmp.test.com", HubName, keyA, 3600)
+	url := pili.RTMPPublishURL("publish-rtmp.test.com", HubName, keyA, mac, 3600)
 	fmt.Printf("keyA=%s RTMP推流地址=%s\n", keyA, url)
 
 	// RTMP 直播放址.
