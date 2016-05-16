@@ -10,10 +10,11 @@
 	- [x] 截图直播地址: SnapshotPlayURL(domain, hub, streamKey)
 - Hub
 	- [x] 创建流: hub.Create(streamKey)
-	- [x] 查询流: hub.Get(streamKey)
+	- [x] 获得流: hub.Stream(streamKey)
 	- [x] 列出流: hub.List(prefix, limit, marker)
 	- [x] 列出正在直播的流: hub.ListLive(prefix, limit, marker)
 - Stream
+	- [x] 流信息: stream.Info()
 	- [x] 禁用流: stream.Disable()
 	- [x] 启用流: stream.Enable()
  	- [x] 查询直播状态: stream.LiveStatus()
@@ -38,6 +39,7 @@
 		- [List Streams](#list-streams)
 		- [List live Streams](#list-live-streams)
 	- [Stream](#stream)
+		- [Get Stream info](#get-stream-info)
 		- [Disable a Stream](#disable-a-stream)
 		- [Enable a Stream](#enable-a-stream)
 		- [Get Stream live status](#get-stream-live-status)
@@ -72,6 +74,7 @@ var (
 )
 
 func main() {
+	// ...
 	mac := &pili.MAC{AccessKey, []byte(SecretKey)}
 	client := pili.New(mac, nil)
 	// ...
@@ -146,33 +149,38 @@ func main() {
 #### Create a new Stream
 
 ```go
-stream, err := hub.Create("streamkey")
+stream, err := hub.Create(key)
 if err != nil {
 	return
 }
-fmt.Println(toJSON(stream))
+info, err := stream.Info()
+if err != nil {
+	return
+}
+fmt.Println(info)
 /*
-{"Hub":"PiliSDKTest","Key":"streamkey","DisabledTill":0}
+{hub:PiliSDKTest,key:streamkey,disabled:false}
 */
 ```
 
 #### Get a Stream
 
 ```go
-stream, err = hub.Get("streamkey")
+stream := hub.Stream(key)
+info, err := stream.Info()
 if err != nil {
 	return
 }
-fmt.Println(toJSON(stream))
+fmt.Println(info)
 /*
-{"Hub":"PiliSDKTest","Key":"streamkey","DisabledTill":0}
+{hub:PiliSDKTest,key:streamkey,disabled:false}
 */
 ```
 
 #### List Streams
 
 ```go
-keys, marker, err := hub.List("str", 10, "")
+keys, marker, err := hub.List(prefix, 10, "")
 if err != nil {
 	return
 }
@@ -185,97 +193,116 @@ keys=[streamkey] marker=
 #### List live Streams
 
 ```go
-keys, marker, err := hub.ListLive("str", 10, "")
+keys, marker, err := hub.ListLive(prefix, 10, "")
 if err != nil {
 	return
 }
 fmt.Printf("keys=%v marker=%v\n", keys, marker)
 /*
-keys=[] marker=
+keys=[streamkey] marker=
 */
 ```
 
 ### Stream
 
-#### Disable a Stream
+#### Get Stream info
 
 ```go
-stream, err := hub.Get("streamkey")
+stream := hub.Stream(key)
+info, err := stream.Info()
 if err != nil {
 	return
 }
-fmt.Println("before disable:", toJSON(stream))
+fmt.Println(info)
+/*
+{hub:PiliSDKTest,key:streamkey,disabled:false}
+*/
+```
+
+#### Disable a Stream
+
+```go
+stream := hub.Stream(key)
+info, err := stream.Info()
+if err != nil {
+	return
+}
+fmt.Println("before disable:", info)
 
 err = stream.Disable()
 if err != nil {
 	return
 }
 
-stream, err = hub.Get("streamkey")
+info, err = stream.Info()
 if err != nil {
 	return
 }
-fmt.Println("after disable:", toJSON(stream))
+fmt.Println("after disable:", info)
 /*
-before disable: {"Hub":"PiliSDKTest","Key":"streamkey","DisabledTill":0}
-after disable: {"Hub":"PiliSDKTest","Key":"streamkey","DisabledTill":-1}
+before disable: {hub:PiliSDKTest,key:streamkey,disabled:false}
+after disable: {hub:PiliSDKTest,key:streamkey,disabled:true}
 */
 ```
 
 #### Enable a Stream
 
 ```go
-stream, err := hub.Get("streamkey")
+stream := hub.Stream(key)
+info, err := stream.Info()
 if err != nil {
 	return
 }
-fmt.Println("before enable:", toJSON(stream))
+fmt.Println("before enable:", info)
 
 err = stream.Enable()
 if err != nil {
 	return
 }
 
-stream, err = hub.Get("streamkey")
+info, err = stream.Info()
 if err != nil {
 	return
 }
-fmt.Println("after enable:", toJSON(stream))
+fmt.Println("after enable:", info)
 /*
-before disable: {"Hub":"PiliSDKTest","Key":"streamkey","DisabledTill":-1}
-after disable: {"Hub":"PiliSDKTest","Key":"streamkey","DisabledTill":0}
+before enable: {hub:PiliSDKTest,key:streamkey,disabled:true}
+after enable: {hub:PiliSDKTest,key:streamkey,disabled:false}
 */
 ```
 
 #### Get Stream live status
 
 ```go
+stream := hub.Stream(key)
 status, err := stream.LiveStatus()
 if err != nil {
 	return
 }
-fmt.Println(toJSON(status))
+fmt.Printf("%+v\n", status)
 /*
-{"startAt":1463022236,"clientIP":"222.73.202.226","bps":248,"fps":{"audio":45,"vedio":28,"data":0}}
+&{StartAt:1463382400 ClientIP:172.21.1.214:52897 BPS:128854 FPS:{Audio:38 Video:23 Data:0}}
 */
 ```
 
 #### Get Stream history record
 
 ```go
+stream := hub.Stream(key)
 records, err := stream.HistoryRecord(0, 0)
 if err != nil {
 	return
 }
 fmt.Println(records)
 /*
-[{1463022236,1463022518}]
+[{1463382401 1463382441}]
 */
 ```
 
 #### Save Stream live playback
 
 ```go
+stream := hub.Stream(key)
 fname, err := stream.Save(0, 0)
 if err != nil {
 	return

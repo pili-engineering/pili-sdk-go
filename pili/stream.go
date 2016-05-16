@@ -4,27 +4,54 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strconv"
+	"time"
 )
 
-type streamInfo struct {
+// StreamInfo 流信息.
+type StreamInfo struct {
 	Hub string
 	Key string
 
 	// 禁用结束的时间, 0 表示不禁用, -1 表示永久禁用.
-	DisabledTill int64
+	disabledTill int64
+}
+
+// Disabled 判断一个流是否被禁用.
+func (s *StreamInfo) Disabled() bool {
+	return s.disabledTill == -1 || s.disabledTill > time.Now().Unix()
+}
+
+// String 返回格式化后的流信息
+func (s *StreamInfo) String() string {
+	return fmt.Sprintf("{hub:%s,key:%s,disabled:%v}", s.Hub, s.Key, s.Disabled())
 }
 
 // Stream 表示一个流对象.
 type Stream struct {
-	streamInfo
+	hub     string
+	key     string
 	baseURL string
 	client  *Client
 }
 
-func newStream(info *streamInfo, client *Client) *Stream {
-	ekey := base64.URLEncoding.EncodeToString([]byte(info.Key))
-	baseURL := fmt.Sprintf("%s%s/v2/hubs/%v/streams/%v", APIHTTPScheme, APIHost, info.Hub, ekey)
-	return &Stream{*info, baseURL, client}
+func newStream(hub, key string, client *Client) *Stream {
+	ekey := base64.URLEncoding.EncodeToString([]byte(key))
+	baseURL := fmt.Sprintf("%s%s/v2/hubs/%v/streams/%v", APIHTTPScheme, APIHost, hub, ekey)
+	return &Stream{hub, key, baseURL, client}
+}
+
+// Info 获得流信息.
+func (s *Stream) Info() (info *StreamInfo, err error) {
+	path := s.baseURL
+	var ret struct {
+		DisabledTill int64 `json:"disabledTill"`
+	}
+	err = s.client.Call(&ret, "GET", path)
+	if err != nil {
+		return
+	}
+	info = &StreamInfo{s.hub, s.key, ret.DisabledTill}
+	return
 }
 
 type disabledArgs struct {
@@ -66,6 +93,7 @@ type LiveStatus struct {
 }
 
 // LiveStatus 查询直播状态.
+// status.StartAt 记录了直播开始的时间, 0 表示当前没在直播.
 func (s *Stream) LiveStatus() (status *LiveStatus, err error) {
 	path := s.baseURL + "/live"
 	err = s.client.Call(&status, "GET", path)

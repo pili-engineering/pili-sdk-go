@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func checkStream(stream *Stream, hub, key string, disabled bool) bool {
-	return stream.Hub == hub && stream.Key == key && (stream.DisabledTill != 0) == disabled
+func checkStream(info *StreamInfo, hub, key string, disabled bool) bool {
+	return info.Hub == hub && info.Key == key && info.Disabled() == disabled
 }
 
 func TestHub(t *testing.T) {
@@ -24,12 +24,15 @@ func TestHub(t *testing.T) {
 	keyA := prefix + "A"
 	streamA, err := hub.Create(keyA)
 	require.NoError(t, err)
-	require.True(t, checkStream(streamA, testHub, keyA, false))
 
 	// Get keyA, success.
-	streamA, err = hub.Get(keyA)
-	require.NoError(t, err)
-	require.True(t, checkStream(streamA, testHub, keyA, false))
+	info, err := streamA.Info()
+	require.True(t, checkStream(info, testHub, keyA, false))
+
+	// Stream and Get keyA
+	streamA = hub.Stream(keyA)
+	info, err = streamA.Info()
+	require.True(t, checkStream(info, testHub, keyA, false))
 
 	// Create keyA, exists.
 	streamA, err = hub.Create(keyA)
@@ -37,13 +40,15 @@ func TestHub(t *testing.T) {
 
 	// Get keyB, not exists.
 	keyB := prefix + "B"
-	_, err = hub.Get(keyB)
+	streamB := hub.Stream(keyB)
+	_, err = streamB.Info()
 	require.True(t, IsNotExists(err))
 
 	// Create keyB, success.
-	streamB, err := hub.Create(keyB)
+	streamB, err = hub.Create(keyB)
 	require.NoError(t, err)
-	require.True(t, checkStream(streamB, testHub, keyB, false))
+	info, err = streamB.Info()
+	require.True(t, checkStream(info, testHub, keyB, false))
 
 	// List all.
 	keys, marker, err := hub.List(prefix, 0, "")

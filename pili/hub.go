@@ -1,9 +1,6 @@
 package pili
 
-import (
-	"encoding/base64"
-	"fmt"
-)
+import "fmt"
 
 // Hub 表示一个 Hub 对象.
 type Hub struct {
@@ -31,32 +28,13 @@ func (h *Hub) Create(streamKey string) (stream *Stream, err error) {
 	if err != nil {
 		return
 	}
-	info := &streamInfo{
-		Hub: h.hub,
-		Key: streamKey,
-	}
-	stream = newStream(info, h.client)
+	stream = newStream(h.hub, streamKey, h.client)
 	return
 }
 
-// Get 获得一个流对象.
-func (h *Hub) Get(streamKey string) (stream *Stream, err error) {
-	ekey := base64.URLEncoding.EncodeToString([]byte(streamKey))
-	path := h.baseURL + "/streams/" + ekey
-	var ret struct {
-		DisabledTill int64 `json:"disabledTill"`
-	}
-	err = h.client.Call(&ret, "GET", path)
-	if err != nil {
-		return
-	}
-	info := &streamInfo{
-		Hub:          h.hub,
-		Key:          streamKey,
-		DisabledTill: ret.DisabledTill,
-	}
-	stream = newStream(info, h.client)
-	return
+// Stream 初始化一个流对象
+func (h *Hub) Stream(key string) *Stream {
+	return newStream(h.hub, key, h.client)
 }
 
 // ---------------------------------------------------------------------------------------
