@@ -39,7 +39,7 @@ func main() {
 	//pili.APIHost = "10.200.20.28:7778"
 
 	// 初始化 client.
-	mac := &pili.MAC{AccessKey, []byte(SecretKey)}
+	mac := &pili.MAC{AccessKey: AccessKey, SecretKey: []byte(SecretKey)}
 	client := pili.New(mac, nil)
 
 	// 初始化 Hub.
