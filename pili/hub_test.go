@@ -16,8 +16,8 @@ func TestHub(t *testing.T) {
 	if skipTest() {
 		t.SkipNow()
 	}
-	client := New(testAccessKey, testSecretKey, nil)
-	hub := NewHub(testHub, client)
+	client := New(&MAC{testAccessKey, []byte(testSecretKey)}, nil)
+	hub := client.Hub(testHub)
 	prefix := testStreamPrefix + "TestHub"
 
 	// Create keyA, success.

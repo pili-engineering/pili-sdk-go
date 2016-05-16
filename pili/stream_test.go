@@ -10,8 +10,9 @@ func TestStream(t *testing.T) {
 	if skipTest() {
 		t.SkipNow()
 	}
-	client := New(testAccessKey, testSecretKey, nil)
-	hub := NewHub(testHub, client)
+	mac := &MAC{testAccessKey, []byte(testSecretKey)}
+	client := New(mac, nil)
+	hub := client.Hub(testHub)
 
 	// Create.
 	key := testStreamPrefix + "TestStream"

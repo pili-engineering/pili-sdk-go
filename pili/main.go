@@ -6,21 +6,14 @@ import (
 	"time"
 )
 
-// Config 用于配置 Client.
-type Config struct {
-	AccessKey string
-	SecretKey string
-}
-
 // Client 代表一个 pili 用户的客户端.
 type Client struct {
 	*rpc
-	mac *mac
+	mac *MAC
 }
 
 // New 初始化 Client.
-func New(accessKey, secretKey string, tr http.RoundTripper) *Client {
-	mac := &mac{accessKey, []byte(secretKey)}
+func New(mac *MAC, tr http.RoundTripper) *Client {
 	rpc := newRPC(newTransport(mac, tr))
 	return &Client{
 		rpc: rpc,
@@ -28,12 +21,18 @@ func New(accessKey, secretKey string, tr http.RoundTripper) *Client {
 	}
 }
 
+// Hub 初始化一个 Hub.
+func (c *Client) Hub(hub string) *Hub {
+
+	return newHub(hub, c)
+}
+
 // RTMPPublishURL 生成 RTMP 推流地址.
 // expireAfterSeconds 表示 URL 在多久之后失效.
-func (c *Client) RTMPPublishURL(domain, hub, streamKey string, expireAfterSeconds int64) string {
+func RTMPPublishURL(domain, hub, streamKey string, mac *MAC, expireAfterSeconds int64) string {
 	expire := time.Now().Unix() + expireAfterSeconds
 	path := fmt.Sprintf("/%s/%s?e=%d", hub, streamKey, expire)
-	token := c.mac.Sign([]byte(path))
+	token := mac.Sign([]byte(path))
 	return fmt.Sprintf("rtmp://%s%s&token=%s", domain, path, token)
 }
 

@@ -12,8 +12,7 @@ type Hub struct {
 	client  *Client
 }
 
-// NewHub 初始化一个 Hub 对象.
-func NewHub(hub string, client *Client) *Hub {
+func newHub(hub string, client *Client) *Hub {
 	baseURL := APIHTTPScheme + APIHost + "/v2/hubs/" + hub
 	return &Hub{hub, baseURL, client}
 }

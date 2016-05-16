@@ -3,7 +3,7 @@
 ## Features
 
 - URL
-	- [x] RTMP推流地址: client.RTMPPublishURL(domain, hub, streamKey, expireAfterDays)
+	- [x] RTMP推流地址: RTMPPublishURL(domain, hub, streamKey, mac, expireAfterDays)
 	- [x] RTMP直播地址: RTMPPlayURL(domain, hub, streamKey)
 	- [x] HLS直播地址: HLSPlayURL(domain, hub, streamKey)
 	- [x] HDL直播地址: HDLPlayURL(domain, hub, streamKey)
@@ -72,7 +72,8 @@ var (
 )
 
 func main() {
-	client := pili.New(AccessKey, SecretKey, nil)
+	mac := &pili.MAC{AccessKey, []byte(SecretKey)}
+	client := pili.New(mac, nil)
 	// ...
 }
 ```
@@ -82,7 +83,7 @@ func main() {
 #### Generate RTMP publish URL
 
 ```go
-url := client.RTMPPublishURL("publish-rtmp.test.com", "PiliSDKTest", "streamkey", 60)
+url := pili.RTMPPublishURL("publish-rtmp.test.com", "PiliSDKTest", "streamkey", mac, 60)
 fmt.Println(url)
 /*
 rtmp://publish-rtmp.test.com/PiliSDKTest/streamkey?e=1463023142&token=7O7hf7Ld1RrC_fpZdFvU8aCgOPuhw2K4eapYOdII:-5IVlpFNNGJHwv-2qKwVIakC0ME=
@@ -135,8 +136,9 @@ http://live-snapshot.test.com/PiliSDKTest/streamkey.jpg
 
 ```go
 func main() {
-	client := pili.New(AccessKey, SecretKey, nil)
-	hub := pili.NewHub("PiliSDKTest", client)
+	mac := &pili.MAC{AccessKey, []byte(SecretKey)}
+	client := pili.New(mac, nil)
+	hub := client.Hub("PiliSDKTest")
 	// ...
 }
 ```
