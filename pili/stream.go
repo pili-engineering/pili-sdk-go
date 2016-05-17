@@ -134,18 +134,18 @@ func (s *Stream) Save(start, end int64) (fname string, err error) {
 	return
 }
 
-// Record 表示一次直播记录
-type Record struct {
+// ActivityRecord 表示一次直播记录
+type ActivityRecord struct {
 	Start int64 `json:"start"` // 直播开始时间
 	End   int64 `json:"end"`   // 直播结束时间
 }
 
 // History 查询直播历史.
 // start, end 是 Unix 时间戳, 限定了查询的时间范围, 0 值表示不限定, 系统会返回所有时间的直播历史.
-func (s *Stream) HistoryRecord(start, end int64) (records []Record, err error) {
-	path := appendQuery(s.baseURL+"/historyrecord", start, end)
+func (s *Stream) HistoryActivity(start, end int64) (records []ActivityRecord, err error) {
+	path := appendQuery(s.baseURL+"/historyactivity", start, end)
 	var ret struct {
-		Items []Record `json:"items"`
+		Items []ActivityRecord `json:"items"`
 	}
 	err = s.client.Call(&ret, "GET", path)
 	if err != nil {

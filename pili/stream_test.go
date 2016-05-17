@@ -71,8 +71,8 @@ func TestStream(t *testing.T) {
 	e, ok = err.(*Error)
 	require.True(t, ok && e.Code == 619)
 
-	// HistoryRecord, empty.
-	records, err := stream.HistoryRecord(0, 0)
+	// HistoryActivity, empty.
+	records, err := stream.HistoryActivity(0, 0)
 	require.NoError(t, err)
 	require.True(t, len(records) == 0)
 }

@@ -19,7 +19,7 @@
 	- [x] 启用流: stream.Enable()
  	- [x] 查询直播状态: stream.LiveStatus()
 	- [x] 保存直播回放: stream.Save(start, end)
-	- [x] 查询直播历史: stream.HistoryRecord(start, end)
+	- [x] 查询直播历史: stream.HistoryActivity(start, end)
 
 ## Contents
 
@@ -43,7 +43,7 @@
 		- [Disable a Stream](#disable-a-stream)
 		- [Enable a Stream](#enable-a-stream)
 		- [Get Stream live status](#get-stream-live-status)
-		- [Get Stream history record](#get-stream-history-record)
+		- [Get Stream history activity](#get-stream-history-activity)
 		- [Save Stream live playback](#save-stream-live-playback)
 
 ## Installation
@@ -285,11 +285,11 @@ fmt.Printf("%+v\n", status)
 */
 ```
 
-#### Get Stream history record
+#### Get Stream history activity
 
 ```go
 stream := hub.Stream(key)
-records, err := stream.HistoryRecord(0, 0)
+records, err := stream.HistoryActivity(0, 0)
 if err != nil {
 	return
 }

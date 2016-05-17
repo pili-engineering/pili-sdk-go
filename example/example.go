@@ -107,9 +107,9 @@ func liveStatus(hub *pili.Hub, key string) {
 	fmt.Printf("%+v\n", status)
 }
 
-func historyRecord(hub *pili.Hub, key string) {
+func historyActivity(hub *pili.Hub, key string) {
 	stream := hub.Stream(key)
-	records, err := stream.HistoryRecord(0, 0)
+	records, err := stream.HistoryActivity(0, 0)
 	if err != nil {
 		return
 	}
@@ -177,7 +177,7 @@ func main() {
 	liveStatus(hub, keyA)
 
 	fmt.Println("查询推流历史:")
-	historyRecord(hub, keyA)
+	historyActivity(hub, keyA)
 
 	fmt.Println("保存直播数据:")
 	savePlayback(hub, keyA)
