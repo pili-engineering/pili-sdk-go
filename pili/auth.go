@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"io"
 	"net/http"
-	"sort"
 
 	"qiniupkg.com/x/bytes.v7/seekable"
 )
@@ -25,32 +24,12 @@ func (m *MAC) Sign(data []byte) string {
 
 // ---------------------------------------------------------------------------------------
 
-const qiniuHeaderPrefix = "X-Qiniu-"
 const maxContentLength = 1024 * 1024
 
 func incBody(req *http.Request, ctType string) bool {
 	typeOk := ctType != "" && ctType != "application/octet-stream"
 	lengthOk := req.ContentLength > 0 && req.ContentLength < maxContentLength
 	return typeOk && lengthOk && req.Body != nil
-}
-
-func signQiniuHeaderValues(header http.Header, w io.Writer) {
-	var keys []string
-	for key := range header {
-		if len(key) > len(qiniuHeaderPrefix) && key[:len(qiniuHeaderPrefix)] == qiniuHeaderPrefix {
-			keys = append(keys, key)
-		}
-	}
-	if len(keys) == 0 {
-		return
-	}
-
-	if len(keys) > 1 {
-		sort.Sort(sortByHeaderKey(keys))
-	}
-	for _, key := range keys {
-		io.WriteString(w, "\n"+key+": "+header.Get(key))
-	}
 }
 
 func (m *MAC) SignRequest(req *http.Request) (token string, err error) {
@@ -68,8 +47,6 @@ func (m *MAC) SignRequest(req *http.Request) (token string, err error) {
 		io.WriteString(h, "\nContent-Type: "+ctType)
 	}
 
-	signQiniuHeaderValues(req.Header, h)
-
 	io.WriteString(h, "\n\n")
 
 	if incBody(req, ctType) {
@@ -83,14 +60,6 @@ func (m *MAC) SignRequest(req *http.Request) (token string, err error) {
 	sign := base64.URLEncoding.EncodeToString(h.Sum(nil))
 	return m.AccessKey + ":" + sign, nil
 }
-
-// ---------------------------------------------------------------------------------------
-
-type sortByHeaderKey []string
-
-func (p sortByHeaderKey) Len() int           { return len(p) }
-func (p sortByHeaderKey) Less(i, j int) bool { return p[i] < p[j] }
-func (p sortByHeaderKey) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 // ---------------------------------------------------------------------------------------
 
