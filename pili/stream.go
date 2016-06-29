@@ -1,203 +1,156 @@
 package pili
 
 import (
-	"crypto/hmac"
-	"crypto/sha1"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"net/url"
+	"strconv"
 	"time"
 )
 
-func (s Stream) Refresh() (stream Stream, err error) {
-	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), s.Id)
-	err = s.rpc.GetCall(&stream, url)
+// StreamInfo 流信息.
+type StreamInfo struct {
+	Hub string
+	Key string
+
+	// 禁用结束的时间, 0 表示不禁用, -1 表示永久禁用.
+	disabledTill int64
+}
+
+// Disabled 判断一个流是否被禁用.
+func (s *StreamInfo) Disabled() bool {
+	return s.disabledTill == -1 || s.disabledTill > time.Now().Unix()
+}
+
+// String 返回格式化后的流信息
+func (s *StreamInfo) String() string {
+	return fmt.Sprintf("{hub:%s,key:%s,disabled:%v}", s.Hub, s.Key, s.Disabled())
+}
+
+// Stream 表示一个流对象.
+type Stream struct {
+	hub     string
+	key     string
+	baseURL string
+	client  *Client
+}
+
+func newStream(hub, key string, client *Client) *Stream {
+	ekey := base64.URLEncoding.EncodeToString([]byte(key))
+	baseURL := fmt.Sprintf("%s%s/v2/hubs/%v/streams/%v", APIHTTPScheme, APIHost, hub, ekey)
+	return &Stream{hub, key, baseURL, client}
+}
+
+// Info 获得流信息.
+func (s *Stream) Info() (info *StreamInfo, err error) {
+	path := s.baseURL
+	var ret struct {
+		DisabledTill int64 `json:"disabledTill"`
+	}
+	err = s.client.Call(&ret, "GET", path)
 	if err != nil {
 		return
 	}
-	stream.rpc = s.rpc
+	info = &StreamInfo{s.hub, s.key, ret.DisabledTill}
 	return
 }
 
-func (s Stream) ToJSONString() (jsonBlob string, err error) {
-	jsonBytes, err := json.Marshal(s)
-	jsonBlob = string(jsonBytes)
+type disabledArgs struct {
+	DisabledTill int64 `json:"disabledTill"`
+}
+
+// Disable 禁用一个流.
+func (s *Stream) Disable() error {
+	args := &disabledArgs{-1}
+	path := s.baseURL + "/disabled"
+	return s.client.CallWithJSON(nil, "POST", path, args)
+}
+
+// Enable 启用一个流.
+func (s *Stream) Enable() error {
+	args := &disabledArgs{0}
+	path := s.baseURL + "/disabled"
+	return s.client.CallWithJSON(nil, "POST", path, args)
+}
+
+// FPSStatus 帧率状态
+type FPSStatus struct {
+	Audio int `json:"audio"`
+	Video int `json:"video"`
+	Data  int `json:"data"`
+}
+
+// LiveStatus 直播状态
+type LiveStatus struct {
+	// 直播开始的 Unix 时间戳, 0 表示当前没在直播.
+	StartAt int64 `json:"startAt"`
+
+	// 直播的客户端 IP.
+	ClientIP string `json:"clientIP"`
+
+	// 直播的码率、帧率信息.
+	BPS int       `json:"bps"`
+	FPS FPSStatus `json:"fps"`
+}
+
+// LiveStatus 查询直播状态.
+// status.StartAt 记录了直播开始的时间, 0 表示当前没在直播.
+func (s *Stream) LiveStatus() (status *LiveStatus, err error) {
+	path := s.baseURL + "/live"
+	err = s.client.Call(&status, "GET", path)
 	return
 }
 
-func (s Stream) Enable() (stream Stream, err error) {
-	data := map[string]bool{"disabled": false}
-	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), s.Id)
-	err = s.rpc.PostCall(&stream, url, data)
-	stream.rpc = s.rpc
-	return
-}
-
-func (s Stream) Disable() (stream Stream, err error) {
-	data := map[string]bool{"disabled": true}
-	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), s.Id)
-	err = s.rpc.PostCall(&stream, url, data)
-	stream.rpc = s.rpc
-	return
-}
-
-func (s Stream) Update() (stream Stream, err error) {
-	data := map[string]interface{}{}
-	if s.PublishKey != "" {
-		data["publishKey"] = s.PublishKey
+func appendQuery(path string, start, end int64) string {
+	flag := "?"
+	if start > 0 {
+		path += flag + "start=" + strconv.FormatInt(start, 10)
+		flag = "&"
 	}
-	if s.PublishSecurity != "" {
-		data["publishSecurity"] = s.PublishSecurity
+	if end > 0 {
+		path += flag + "end=" + strconv.FormatInt(end, 10)
 	}
-	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), s.Id)
-	err = s.rpc.PostCall(&stream, url, data)
-	stream.rpc = s.rpc
-	return
+	return path
 }
 
-func (s Stream) Delete() (ret interface{}, err error) {
-	url := fmt.Sprintf("%s/streams/%s", getApiBaseUrl(), s.Id)
-	err = s.rpc.DelCall(&ret, url)
-	return
+type saveArgs struct {
+	Start int64 `json:"start"`
+	End   int64 `json:"end"`
 }
 
-func (s Stream) Status() (ret StreamStatus, err error) {
-	url := fmt.Sprintf("%s/streams/%s/status", getApiBaseUrl(), s.Id)
-	err = s.rpc.GetCall(&ret, url)
-	return
-}
-
-func (s Stream) Segments(args OptionalArguments) (ret StreamSegmentList, err error) {
-	url := fmt.Sprintf("%s/streams/%s/segments", getApiBaseUrl(), s.Id)
-	if args.Start > 0 {
-		url = fmt.Sprintf("%s?start=%d", url, args.Start)
+// Save 保存直播回放.
+// start, end 是 Unix 时间戳, 限定了保存的直播的时间范围, 0 值表示不限定, 系统会默认保存最近一次直播的内容.
+// fname 保存的文件名, 由系统生成.
+func (s *Stream) Save(start, end int64) (fname string, err error) {
+	path := appendQuery(s.baseURL+"/saveas", start, end)
+	args := &saveArgs{start, end}
+	var ret struct {
+		Fname string `json:"fname"`
 	}
-	if args.End > 0 {
-		url = fmt.Sprintf("%s&end=%d", url, args.End)
-	}
-	if args.Limit > 0 {
-		url = fmt.Sprintf("%s&limit=%d", url, args.Limit)
-	}
-	err = s.rpc.GetCall(&ret, url)
-	return
-}
-
-func (s Stream) SaveAs(name, format string, start, end int64, args OptionalArguments) (ret StreamSaveAsResponse, err error) {
-	data := map[string]interface{}{"name": name, "start": start, "end": end}
-	if args.NotifyUrl != "" {
-		data["notifyUrl"] = args.NotifyUrl
-	}
-	if args.UserPipeline != "" {
-		data["pipeline"] = args.UserPipeline
-	}
-	if format != "" {
-		data["format"] = format
-	}
-	url := fmt.Sprintf("%s/streams/%s/saveas", getApiBaseUrl(), s.Id)
-	fmt.Println("saveas url:", url, "data:", data)
-	err = s.rpc.PostCall(&ret, url, data)
-	return
-}
-
-func (s Stream) Snapshot(name, format string, args OptionalArguments) (ret StreamSnapshotResponse, err error) {
-	data := map[string]interface{}{"name": name, "format": format}
-	if args.Time > 0 {
-		data["time"] = args.Time
-	}
-	if args.NotifyUrl != "" {
-		data["notifyUrl"] = args.NotifyUrl
-	}
-	url := fmt.Sprintf("%s/streams/%s/snapshot", getApiBaseUrl(), s.Id)
-	err = s.rpc.PostCall(&ret, url, data)
-	return
-}
-
-// Publish URL
-// -------------------------------------------------------------------------------
-func (s Stream) RtmpPublishUrl() (url string) {
-	switch s.PublishSecurity {
-	case "dynamic":
-		url = s.rtmpPublishDynamicUrl()
-	case "static":
-		url = s.rtmpPublishStaticUrl()
-	}
-	return
-}
-
-func (s Stream) rtmpPublishDynamicUrl() (url string) {
-	nonce := time.Now().UnixNano()
-	url = fmt.Sprintf("%s?nonce=%d&token=%s", s.rtmpPublishBaseUrl(), nonce, s.publishToken(nonce))
-	return
-}
-
-func (s Stream) rtmpPublishStaticUrl() (url string) {
-	url = fmt.Sprintf("%s?key=%s", s.rtmpPublishBaseUrl(), s.PublishKey)
-	return
-}
-
-func (s Stream) rtmpPublishBaseUrl() (url string) {
-	url = fmt.Sprintf("rtmp://%s/%s/%s", s.Hosts.Publish["rtmp"], s.Hub, s.Title)
-	return
-}
-
-func (s Stream) publishToken(nonce int64) (token string) {
-	u, _ := url.Parse(s.rtmpPublishBaseUrl())
-	uriStr := u.Path
-	if u.RawQuery != "" {
-		uriStr += "?" + u.RawQuery
-	}
-	uriStr = fmt.Sprintf("%s?nonce=%d", uriStr, nonce)
-	token = s.sign([]byte(s.PublishKey), []byte(uriStr))
-	return
-}
-
-func (s Stream) sign(secret, data []byte) (token string) {
-	h := hmac.New(sha1.New, secret)
-	h.Write(data)
-	token = base64.URLEncoding.EncodeToString(h.Sum(nil))
-	return
-}
-
-// RTMP Live Play URLs
-// --------------------------------------------------------------------------------
-
-func (s Stream) RtmpLiveUrls() (urls map[string]string, err error) {
-	urls = make(map[string]string)
-	url := fmt.Sprintf("rtmp://%s/%s/%s", s.Hosts.Live["rtmp"], s.Hub, s.Title)
-	urls[ORIGIN] = url
-	return
-}
-
-// HLS Live Play URLs
-// --------------------------------------------------------------------------------
-
-func (s Stream) HlsLiveUrls() (urls map[string]string, err error) {
-	urls = make(map[string]string)
-	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.m3u8", s.Hosts.Live["hls"], s.Hub, s.Title)
-	return
-}
-
-// Http-Flv Live Play URLs
-// --------------------------------------------------------------------------------
-
-func (s Stream) HttpFlvLiveUrls() (urls map[string]string, err error) {
-	urls = make(map[string]string)
-	urls[ORIGIN] = fmt.Sprintf("http://%s/%s/%s.flv", s.Hosts.Live["hdl"], s.Hub, s.Title)
-	return
-}
-
-// HLS Playback URLs
-// --------------------------------------------------------------------------------
-
-func (s Stream) HlsPlaybackUrls(start, end int64) (urls map[string]string, err error) {
-	name := fmt.Sprintf("%d", time.Now().Unix())
-	ret, err := s.SaveAs(name, "", start, end, OptionalArguments{})
+	err = s.client.CallWithJSON(&ret, "POST", path, args)
 	if err != nil {
-		return nil, err
+		return
 	}
+	fname = ret.Fname
+	return
+}
 
-	urls = make(map[string]string)
-	urls[ORIGIN] = ret.Url
+// ActivityRecord 表示一次直播记录
+type ActivityRecord struct {
+	Start int64 `json:"start"` // 直播开始时间
+	End   int64 `json:"end"`   // 直播结束时间
+}
+
+// History 查询直播历史.
+// start, end 是 Unix 时间戳, 限定了查询的时间范围, 0 值表示不限定, 系统会返回所有时间的直播历史.
+func (s *Stream) HistoryActivity(start, end int64) (records []ActivityRecord, err error) {
+	path := appendQuery(s.baseURL+"/historyactivity", start, end)
+	var ret struct {
+		Items []ActivityRecord `json:"items"`
+	}
+	err = s.client.Call(&ret, "GET", path)
+	if err != nil {
+		return
+	}
+	records = ret.Items
 	return
 }

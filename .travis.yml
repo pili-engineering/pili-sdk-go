@@ -1,0 +1,18 @@
+language: go
+install:
+  - go get -u qiniupkg.com/x/bytes.v7/seekable
+  - go get -u github.com/stretchr/testify/require
+script:
+  - echo $TRAVIS_BRANCH
+  - echo $TRAVIS_COMMIT
+  - echo $TRAVIS_COMMIT_RANGE
+  - echo $TRAVIS_PULL_REQUEST
+  - echo $TRAVIS_REPO_SLUG
+  - echo $TRAVIS_JOB_ID
+  - echo $TRAVIS_JOB_NUMBER
+  - echo $TRAVIS_BUILD_ID
+  - echo $TRAVIS_BUILD_NUMBER
+  - make
+  - make gofmt
+  - make govet
+  - make test

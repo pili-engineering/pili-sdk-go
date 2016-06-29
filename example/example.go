@@ -1,194 +1,204 @@
 package main
 
 import (
-	"../pili" // or "github.com/pili-engineering/pili-sdk-go/pili"
 	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"time"
+
+	"github.com/pili-engineering/pili-sdk-go/pili"
 )
 
-const (
-
-	// Replace with your keys here
-	ACCESS_KEY = "Qiniu_AccessKey"
-	SECRET_KEY = "Qiniu_SecretKey"
-
-	// The Hub must be exists before use
-	HUB_NAME = "Pili_Hub_Name"
+var (
+	AccessKey = "<QINIU ACCESS KEY>" // 替换成自己 Qiniu 账号的 AccessKey.
+	SecretKey = "<QINIU SECRET KEY>" // 替换成自己 Qiniu 账号的 SecretKey.
+	HubName   = "<PILI HUB NAME>"    // Hub 必须事先存在.
 )
+
+func init() {
+	AccessKey = os.Getenv("PILI_ACCESS_KEY")
+	SecretKey = os.Getenv("PILI_SECRET_KEY")
+}
+
+func createStream(hub *pili.Hub, key string) {
+	stream, err := hub.Create(key)
+	if err != nil {
+		return
+	}
+	info, err := stream.Info()
+	if err != nil {
+		return
+	}
+	fmt.Println(info)
+}
+
+func getStream(hub *pili.Hub, key string) {
+	stream := hub.Stream(key)
+	info, err := stream.Info()
+	if err != nil {
+		return
+	}
+	fmt.Println(info)
+}
+
+func listStreams(hub *pili.Hub, prefix string) {
+	keys, marker, err := hub.List(prefix, 10, "")
+	if err != nil {
+		return
+	}
+	fmt.Printf("keys=%v marker=%v\n", keys, marker)
+}
+
+func listLiveStreams(hub *pili.Hub, prefix string) {
+	keys, marker, err := hub.ListLive(prefix, 10, "")
+	if err != nil {
+		return
+	}
+	fmt.Printf("keys=%v marker=%v\n", keys, marker)
+}
+
+func disableStream(hub *pili.Hub, key string) {
+	stream := hub.Stream(key)
+	info, err := stream.Info()
+	if err != nil {
+		return
+	}
+	fmt.Println("before disable:", info)
+
+	err = stream.Disable()
+	if err != nil {
+		return
+	}
+
+	info, err = stream.Info()
+	if err != nil {
+		return
+	}
+	fmt.Println("after disable:", info)
+}
+
+func enableStream(hub *pili.Hub, key string) {
+	stream := hub.Stream(key)
+	info, err := stream.Info()
+	if err != nil {
+		return
+	}
+	fmt.Println("before enable:", info)
+
+	err = stream.Enable()
+	if err != nil {
+		return
+	}
+
+	info, err = stream.Info()
+	if err != nil {
+		return
+	}
+	fmt.Println("after enable:", info)
+}
+
+func liveStatus(hub *pili.Hub, key string) {
+	stream := hub.Stream(key)
+	status, err := stream.LiveStatus()
+	if err != nil {
+		return
+	}
+	fmt.Printf("%+v\n", status)
+}
+
+func historyActivity(hub *pili.Hub, key string) {
+	stream := hub.Stream(key)
+	records, err := stream.HistoryActivity(0, 0)
+	if err != nil {
+		return
+	}
+	fmt.Println(records)
+}
+
+func savePlayback(hub *pili.Hub, key string) {
+	stream := hub.Stream(key)
+	fname, err := stream.Save(0, 0)
+	if err != nil {
+		return
+	}
+	fmt.Println(fname)
+}
 
 func main() {
+	// 检查 AccessKey、SecretKey 的配置情况.
+	if AccessKey == "" || SecretKey == "" {
+		log.Printf("WARN: AccessKey=%s SecretKey=%s\n", AccessKey, SecretKey)
+		return
+	}
+	streamKeyPrefix := "sdkexample" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	// Change API host as necessary
-	//
-	// pili.qiniuapi.com as default
-	// pili-lte.qiniuapi.com is the latest RC version
-	//
-	// pili.API_HOST = "pili.qiniuapi.com" // default
+	//HubName = "PiliSDKTest"
+	//pili.APIHost = "10.200.20.28:7778"
 
-	// Instantiate a Pili Hub object
-	credentials := pili.NewCredentials(ACCESS_KEY, SECRET_KEY)
-	hub := pili.NewHub(credentials, HUB_NAME)
+	// 初始化 client & hub.
+	mac := &pili.MAC{AccessKey: AccessKey, SecretKey: []byte(SecretKey)}
+	client := pili.New(mac, nil)
+	hub := client.Hub(HubName)
 
-	// Create a new stream
-	options := pili.OptionalArguments{ // optional
-		Title:           "stream_name",       // optional, auto-generated as default
-		PublishKey:      "some_secret_words", // optional, auto-generated as default
-		PublishSecurity: "dynamic",           // optional, can be "dynamic" or "static", "dynamic" as default
-	}
-	stream, err := hub.CreateStream(options)
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("CreateStream:\n", stream)
+	keyA := streamKeyPrefix + "A"
+	fmt.Println("获得不存在的流A:")
+	streamA := hub.Stream(keyA)
+	_, err := streamA.Info()
+	fmt.Println(err, "IsNotExists", pili.IsNotExists(err))
 
-	// Get a stream
-	stream, err = hub.GetStream(stream.Id)
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("GetStream:\n", stream)
+	fmt.Println("创建流:")
+	createStream(hub, keyA)
 
-	// List streams
-	options = pili.OptionalArguments{ // optional
-	//Status: "connected", // optional
-	//Marker: "",          // optional, returned by server response
-	//Limit:  50,          // optional
-	//Title:  "",          // optional, title prefix
-	}
-	listResult, err := hub.ListStreams(options)
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("ListStreams:\n", listResult)
-	for _, stream := range listResult.Items {
-		fmt.Println("Stream:\n", stream)
-	}
+	fmt.Println("获得流:")
+	getStream(hub, keyA)
 
-	// To JSON String
-	streamJson, err := stream.ToJSONString()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Stream ToJSONString:\n", streamJson)
+	fmt.Println("创建重复流:")
+	_, err = hub.Create(keyA)
+	fmt.Println(err, "IsExists", pili.IsExists(err))
 
-	// Update a stream
-	stream.PublishKey = "new_secret_words" // optional
-	stream.PublishSecurity = "static"      // optional
-	stream, err = stream.Update()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Stream Updated:\n", stream)
+	keyB := streamKeyPrefix + "B"
+	fmt.Println("创建另一路流:")
+	createStream(hub, keyB)
 
-	// Disable a stream
-	stream, err = stream.Disable()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Stream Disabled:\n", stream)
+	fmt.Println("列出流:")
+	listStreams(hub, "carter")
 
-	// Enable a stream
-	stream, err = stream.Enable()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Stream Enabled:\n", stream)
+	fmt.Println("列出正在直播的流:")
+	listLiveStreams(hub, "carter")
 
-	// Generate RTMP publish URL
-	url := stream.RtmpPublishUrl()
-	fmt.Println("Stream RtmpPublishUrl:\n", url)
+	fmt.Println("禁用流:")
+	disableStream(hub, keyA)
 
-	// Generate RTMP live play URLs
-	urls, err := stream.RtmpLiveUrls()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("RtmpLiveUrls:", urls)
-	for k, v := range urls {
-		fmt.Printf("%s:%s\n", k, v)
-	}
+	fmt.Println("启用流:")
+	enableStream(hub, keyA)
 
-	// Generate HLS live play URLs
-	urls, err = stream.HlsLiveUrls()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("HlsLiveUrls:", urls)
-	for k, v := range urls {
-		fmt.Printf("%s:%s\n", k, v)
-	}
+	fmt.Println("查询直播状态:")
+	liveStatus(hub, keyA)
 
-	// Generate Http-Flv live play URLs
-	urls, err = stream.HttpFlvLiveUrls()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("HttpFlvLiveUrls:", urls)
-	for k, v := range urls {
-		fmt.Printf("%s:%s\n", k, v)
-	}
+	fmt.Println("查询推流历史:")
+	historyActivity(hub, keyA)
 
-	// Get stream status
-	streamStatus, err := stream.Status()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Stream Status:\n", streamStatus)
+	fmt.Println("保存直播数据:")
+	savePlayback(hub, keyA)
 
-	// Get stream segments
-	options = pili.OptionalArguments{ // optional
-		Start: 1440379800, // optional, in second, unix timestamp
-		End:   1440479880, // optional, in second, unix timestamp
-		Limit: 20,         // optional, uint
-	}
-	segments, err := stream.Segments(options)
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Segments:\n", segments)
+	fmt.Println("RTMP 推流地址:")
+	url := pili.RTMPPublishURL("publish-rtmp.test.com", HubName, keyA, mac, 3600)
+	fmt.Println(url)
 
-	// Generate HLS playback URLs
-	start := 1440379847
-	end := 1440379857
-	urls, err = stream.HlsPlaybackUrls(int64(start), int64(end))
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("HlsPlaybackUrls:", urls)
-	for k, v := range urls {
-		fmt.Printf("%s:%s\n", k, v)
-	}
+	fmt.Println("RTMP 直播放址:")
+	url = pili.RTMPPlayURL("live-rtmp.test.com", HubName, keyA)
+	fmt.Println(url)
 
-	// Save Stream as a file
-	name := "fileName.mp4" // required, string
-	start = 1440379847     // required, int64, in second, unix timestamp
-	end = 1440379857       // required, int64, in second, unix timestamp
-	format := "mp4"        // optional, string
-	options = pili.OptionalArguments{
-		NotifyUrl: "http://remote_callback_url",
-	} // optional
-	saveAsRes, err := stream.SaveAs(name, format, int64(start), int64(end), options)
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Stream save as:\n", saveAsRes)
+	fmt.Println("HLS 直播地址:")
+	url = pili.HLSPlayURL("live-hls.test.com", HubName, keyA)
+	fmt.Println(url)
 
-	// Snapshot Stream
-	name = "fileName.jpg" // required, string
-	format = "jpg"        // required, string
-	options = pili.OptionalArguments{
-		Time:      1440379847, // optional, int64, in second, unit timestamp
-		NotifyUrl: "http://remote_callback_url",
-	} // optional
-	snapshotRes, err := stream.Snapshot(name, format, options)
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Stream Snapshot:\n", snapshotRes)
+	fmt.Println("HDL 直播地址:")
+	url = pili.HDLPlayURL("live-hdl.test.com", HubName, keyA)
+	fmt.Println(url)
 
-	// Delete a stream
-	deleteResult, err := stream.Delete()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	fmt.Println("Stream Deleted:\n", deleteResult)
+	fmt.Println("截图直播地址:")
+	url = pili.SnapshotPlayURL("live-snapshot.test.com", HubName, keyA)
+	fmt.Println(url)
 }
