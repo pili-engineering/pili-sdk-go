@@ -1,3 +1,38 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Pili Streaming Cloud server-side library for Golang](#pili-streaming-cloud-server-side-library-for-golang)
+  - [Features](#features)
+  - [Contents](#contents)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Configuration](#configuration)
+    - [Hub](#hub)
+      - [Instantiate a Pili Hub object](#instantiate-a-pili-hub-object)
+      - [Create a new Stream](#create-a-new-stream)
+      - [Get a Stream](#get-a-stream)
+      - [List streams](#list-streams)
+    - [Stream](#stream)
+      - [To JSON String](#to-json-string)
+      - [Update a Stream](#update-a-stream)
+      - [Disable a stream](#disable-a-stream)
+      - [Disable a stream with disableTill](#disable-a-stream-with-disabletill)
+      - [Enable a Stream](#enable-a-stream)
+      - [Generate RTMP publish URL](#generate-rtmp-publish-url)
+      - [Generate RTMP live play URLs](#generate-rtmp-live-play-urls)
+      - [Generate HLS play live URLs](#generate-hls-play-live-urls)
+      - [Generate Http-Flv live play URLs](#generate-http-flv-live-play-urls)
+      - [Get Stream status](#get-stream-status)
+      - [Get Stream segments](#get-stream-segments)
+      - [Generate HLS playback URLs](#generate-hls-playback-urls)
+      - [Save Stream as a file](#save-stream-as-a-file)
+      - [Snapshot Stream](#snapshot-stream)
+      - [Delete a Stream](#delete-a-stream)
+  - [History](#history)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Pili Streaming Cloud server-side library for Golang
 
 ## Features
@@ -310,6 +345,15 @@ fmt.Println("Stream Disabled:\n", stream.Disabled)
 /*
 true
 */
+```
+
+#### Disable a stream with disableTill
+
+```go
+err := stream.DisableTill(time.Now().Add(time.Hour))
+if err != nil {
+    fmt.Println("Error:", err)
+}
 ```
 
 #### Enable a Stream

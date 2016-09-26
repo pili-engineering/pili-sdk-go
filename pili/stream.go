@@ -42,6 +42,20 @@ func (s Stream) Disable() (stream Stream, err error) {
 	return
 }
 
+type disabledArgs struct {
+	Available    string `json:"available"`
+	DisabledTill int64  `json:"disabledTill"`
+}
+
+func (s Stream) DisableTill(till time.Time) error {
+	args := &disabledArgs{
+		Available:    "disabled",
+		DisabledTill: till.Unix(),
+	}
+	url := fmt.Sprintf("%s/streams/%s/available", getApiBaseUrl(), s.Id)
+	return s.rpc.PostCall(nil, url, args)
+}
+
 func (s Stream) Update() (stream Stream, err error) {
 	data := map[string]interface{}{}
 	if s.PublishKey != "" {

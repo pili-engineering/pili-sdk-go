@@ -3,6 +3,7 @@ package main
 import (
 	"../pili" // or "github.com/pili-engineering/pili-sdk-go/pili"
 	"fmt"
+	"time"
 )
 
 const (
@@ -87,6 +88,18 @@ func main() {
 	fmt.Println("Stream Disabled:\n", stream)
 
 	// Enable a stream
+	stream, err = stream.Enable()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	fmt.Println("Stream Enabled:\n", stream)
+
+	// Disable a stream with disableTill
+	err = stream.DisableTill(time.Now().Add(time.Hour))
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
 	stream, err = stream.Enable()
 	if err != nil {
 		fmt.Println("Error:", err)
