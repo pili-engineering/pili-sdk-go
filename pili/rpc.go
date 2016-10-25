@@ -91,8 +91,8 @@ func (r RPC) DelCall(ret interface{}, url string) (err error) {
 }
 
 type ErrorInfo struct {
-	Message string           `json:"message"`
-	ErrCode int              `json:"error"`
+	Message string           `json:"error"`
+	ErrCode int              `json:"errno"`
 	Details map[string]error `json:"details,omitempty"`
 	Code    int              `json:"code"`
 }
