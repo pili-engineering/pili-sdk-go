@@ -47,3 +47,22 @@ func (c *Credentials) MACToken(req *http.Request) (token string, err error) {
 	token = c.AccessKey + ":" + sign
 	return
 }
+
+func (c *Credentials) SignWithData(b []byte) string {
+	blen := base64.URLEncoding.EncodedLen(len(b))
+	key := c.AccessKey
+	nkey := len(key)
+	ret := make([]byte, nkey+30+blen)
+	base64.URLEncoding.Encode(ret[nkey+30:], b)
+
+	h := hmac.New(sha1.New, []byte(c.SecretKey))
+	h.Write(ret[nkey+30:])
+	digest := h.Sum(nil)
+
+	copy(ret, key)
+	ret[nkey] = ':'
+	base64.URLEncoding.Encode(ret[nkey+1:], digest)
+	ret[nkey+29] = ':'
+
+	return string(ret)
+}

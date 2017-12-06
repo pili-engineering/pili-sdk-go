@@ -88,3 +88,23 @@ type OptionalArguments struct {
 	NotifyUrl       string
 	UserPipeline    string
 }
+
+type Room struct {
+	RoomName string `json:"room_name"`
+	OwnerId  string `json:"owner_id"`
+	UserMax  int    `json:"user_max"`
+}
+
+type RoomOptionArguments struct {
+	Name    string `json:"room_name"`
+	UserMax int64  `json:"user_max"`
+	Version string `json:"version"`
+}
+
+type RoomAccessPolicy struct {
+	Room     string `json:"room_name"`
+	User     string `json:"user_id"`
+	Perm     string `json:"perm"`
+	Version  string `json:"version"`
+	ExpireAt int64  `json:"expire_at"`
+}
