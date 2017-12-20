@@ -6,11 +6,13 @@ import (
 )
 
 const (
-	SDK_VERSION         = "1.5.2"
-	SDK_USER_AGENT      = "pili-sdk-go"
-	DEFAULT_API_VERSION = "v1"
-	DEFAULT_API_HOST    = "pili.qiniuapi.com"
-	ORIGIN              = "ORIGIN"
+	SDK_VERSION             = "1.5.3"
+	SDK_USER_AGENT          = "pili-sdk-go"
+	DEFAULT_API_VERSION     = "v1"
+	DEFAULT_API_HOST        = "pili.qiniuapi.com"
+	ORIGIN                  = "ORIGIN"
+	DEFAULT_RTC_API_VERSION = "v2"
+	DEFAULT_RTC_API_HOST    = "rtc.qiniuapi.com"
 )
 
 var (
@@ -40,4 +42,8 @@ func getApiHost() (host string) {
 
 func getApiBaseUrl() (url string) {
 	return fmt.Sprintf("%s://%s/%s", getHttpScheme(), getApiHost(), DEFAULT_API_VERSION)
+}
+
+func getRtcApiBaseUrl() (url string) {
+	return fmt.Sprintf("%s://%s/%s", getHttpScheme(), DEFAULT_RTC_API_HOST, DEFAULT_RTC_API_VERSION)
 }
