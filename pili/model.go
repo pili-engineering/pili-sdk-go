@@ -95,10 +95,18 @@ type Room struct {
 	UserMax  int    `json:"user_max"`
 }
 
+type AllActiveUsers struct {
+	Users []ActiveUser `json:"active_users"`
+}
+
+type ActiveUser struct {
+	UserId string `json:"UserID"`
+}
+
 type RoomOptionArguments struct {
+	OwnerId string `json:"owner_id"`
 	Name    string `json:"room_name"`
 	UserMax int64  `json:"user_max"`
-	Version string `json:"version"`
 }
 
 type RoomAccessPolicy struct {

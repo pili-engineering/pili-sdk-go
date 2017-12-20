@@ -16,10 +16,10 @@ const (
 	HUB_NAME = "Pili_Hub_Name"
 )
 
-func createStream(hub pili.Hub) {
+func createStream(hub pili.Hub, streamId string) {
 	// Create a new stream
 	options := pili.OptionalArguments{ // optional
-		Title:           "stream_name_1",     // optional, auto-generated as default
+		Title:           streamId,            // optional, auto-generated as default
 		PublishKey:      "some_secret_words", // optional, auto-generated as default
 		PublishSecurity: "dynamic",           // optional, can be "dynamic" or "static", "dynamic" as default
 	}
@@ -62,7 +62,6 @@ func listStream(hub pili.Hub) {
 
 func updateStream(hub pili.Hub, streamId string) {
 	// Update a stream
-	// var err error
 	stream, err := hub.GetStream(streamId)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -270,17 +269,18 @@ func toJsonString(stream pili.Stream) {
 	fmt.Printf("Stream ToJSONString:%s\n", streamJson)
 }
 
-func createRoom(meeting pili.Meeting) {
+func createRoom(meeting pili.Meeting, ownerid, room string) {
 	option := pili.RoomOptionArguments{
-		Name:    "roomName",
+		OwnerId: ownerid,
+		Name:    room,
 		UserMax: 10,
 	}
-	room, err := meeting.CreateRoom(option)
+	roomInfo, err := meeting.CreateRoom(option)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(room.RoomName)
+	fmt.Println(roomInfo.RoomName)
 }
 
 func getRoom(meeting pili.Meeting, roomName string) {
@@ -290,6 +290,31 @@ func getRoom(meeting pili.Meeting, roomName string) {
 		return
 	}
 	fmt.Printf("%v\n", room)
+}
+
+func getActiveUser(meeting pili.Meeting, roomName string) (userid string) {
+	allUsers, err := meeting.ActiveUsers(roomName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("%v\n", allUsers)
+	if len(allUsers.Users) > 1 {
+		return allUsers.Users[0].UserId
+	}
+	return ""
+}
+
+func rejectUser(meeting pili.Meeting, roomName, userId string) {
+	if userId == "" {
+		return
+	}
+	err := meeting.RejectUser(roomName, userId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("reject user %s\n", userId)
 }
 
 func deleteRoom(meeting pili.Meeting, roomName string) {
@@ -312,48 +337,73 @@ func main() {
 
 	// Instantiate a Pili Hub object
 	credentials := pili.NewCredentials(ACCESS_KEY, SECRET_KEY)
-	// hub := pili.NewHub(credentials, HUB_NAME)
-	meeting := pili.NewMeeting(credentials, "123")
+	hub := pili.NewHub(credentials, HUB_NAME)
+	meeting := pili.NewMeeting(credentials)
+
+	streamKey := fmt.Sprintf("sdk_test_%d", time.Now().UnixNano())
+	room := "sdk_room_test"
+
+	fmt.Printf("streamKey = %s\n", streamKey)
+	fmt.Printf("room = %s\n", room)
 
 	//创建流
-	// createStream(hub)
+	fmt.Println("创建流：")
+	createStream(hub, streamKey)
 
 	//获取流
-	// getStream(hub, "z1.NIU7PS.stream_name_1")
+	fmt.Println("获取流：")
+	streamKey = fmt.Sprintf("z1.%s.%s", HUB_NAME, streamKey)
+	getStream(hub, streamKey)
 
 	//获取流列表
-	// listStream(hub)
+	fmt.Println("获取流列表：")
+	listStream(hub)
 
 	//更新流
-	// updateStream(hub, "z1.NIU7PS.stream_name_1")
+	fmt.Println("更新流：")
+	updateStream(hub, streamKey)
 
 	//禁播流
-	// disableStream(hub, "z1.NIU7PS.stream_name_1")
+	fmt.Println("禁播流：")
+	disableStream(hub, streamKey)
 
 	//解禁流
-	// enableStream(hub, "z1.NIU7PS.stream_name_1")
+	fmt.Println("解禁流：")
+	enableStream(hub, streamKey)
 
 	//获取直播播放链接
-	// getPlayUrl(hub, "z1.NIU7PS.stream_name_1")
+	fmt.Println("获取播放链接：")
+	getPlayUrl(hub, streamKey)
 
 	//查看流状态
-	// getStreamStatus(hub, "z1.NIU7PS.stream_name_1")
+	fmt.Println("查看流状态：")
+	getStreamStatus(hub, streamKey)
 
 	//获取流的 segments
-	// getSegments(hub, "z1.NIU7PS.stream_name_1")
+	fmt.Println("获取 segments:")
+	getSegments(hub, streamKey)
 
 	//---------------------------- rtc -------------------------------------//
 
 	//创建连麦房间
-	// createRoom(meeting)
+	fmt.Println("创建连麦房间：")
+	ownerId := "ownerid"
+	createRoom(meeting, ownerId, room)
 
 	//获取连麦房间
-	// getRoom(meeting, "roomName")
+	fmt.Println("获取连麦房间：")
+	getRoom(meeting, room)
 
-	//删除连麦房间
-	// deleteRoom(meeting, "roomName")
+	//获取连麦房间活跃人数
+	fmt.Println("获取连麦房间内的活跃人数：")
+	userid := getActiveUser(meeting, room)
+
+	//剔除连麦用户
+	fmt.Println("剔除连麦用户：")
+	rejectUser(meeting, room, userid)
 
 	//签算roomtoken
+	fmt.Println("签算 room token：")
 	option := pili.RoomAccessPolicy{
 		Room:     "roomName",
 		User:     "123",
@@ -367,4 +417,8 @@ func main() {
 		return
 	}
 	fmt.Println(token)
+
+	//删除连麦房间
+	fmt.Println("删除连麦房间：")
+	deleteRoom(meeting, room)
 }
